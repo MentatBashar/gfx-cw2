@@ -1,0 +1,3 @@
+Task 1.1:
+
+All three members had written their own matrix functions for this task, however Charlie's were used because they do not use for loops to calculate the output, hence they should be slightly faster.
