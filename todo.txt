@@ -1,4 +1,4 @@
-Do tasks from top-to-bottom. Tasks have been ordered in what is roughly easiest to hardest
+Do tasks from top-to-bottom. Tasks have been roughly ordered from easiest to hardest.
 Each block should be done before the previous, and each task in a block can be completed in parallel with other tasks in the same block.
 
 * Reimplement simple_mesh so that we aren't accused of stealing it
@@ -23,4 +23,7 @@ Each block should be done before the previous, and each task in a block can be c
 * Add local light sources
 * Add particles
 * Add split screen
+
+
+Without the stretch tasks and assuming full marks for completed tasks, this makes for ~37 marks.
 
