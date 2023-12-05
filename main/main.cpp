@@ -223,9 +223,9 @@ int main() try
   std::size_t vertexCount = axis.positions.size();
 
 
-  auto armadillo = load_wavefront_obj("assets/Armadillo.obj");
-  GLuint armadillo_vao = create_vao(armadillo);
-  std::size_t armadilloVertexCount = armadillo.positions.size();
+  auto terrain_mesh = load_wavefront_obj("assets/parlahti.obj");
+  GLuint terrain_vao = create_vao(terrain_mesh);
+  std::size_t terrainVertexCount = terrain_mesh.positions.size();
 
   OGL_CHECKPOINT_ALWAYS();
 
@@ -286,7 +286,7 @@ int main() try
     Mat44f projection = make_perspective_projection(
         60.f * kPi_ / 180.f,
         fbwidth/float(fbheight),
-        0.1f, 100.f
+        0.1f, 150.f
         );
 
     Mat44f projCameraWorld = projection * world2camera * model2world;
@@ -308,9 +308,9 @@ int main() try
     glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
     glDrawArrays(GL_TRIANGLES, 0, vertexCount);
 
-    glBindVertexArray(armadillo_vao);
+    glBindVertexArray(terrain_vao);
     glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-    glDrawArrays(GL_TRIANGLES, 0, armadilloVertexCount);
+    glDrawArrays(GL_TRIANGLES, 0, terrainVertexCount);
 
     OGL_CHECKPOINT_DEBUG();
 
