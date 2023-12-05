@@ -1,6 +1,8 @@
 _build_/
 bin/
 
+.DS_Store
+
 *.swp
 
 # Prerequisites
