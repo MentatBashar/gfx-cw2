@@ -65,8 +65,16 @@ endif
 GENERATED :=
 OBJECTS :=
 
+GENERATED += $(OBJDIR)/cone.o
+GENERATED += $(OBJDIR)/cylinder.o
+GENERATED += $(OBJDIR)/loadobj.o
 GENERATED += $(OBJDIR)/main.o
+GENERATED += $(OBJDIR)/simple_mesh.o
+OBJECTS += $(OBJDIR)/cone.o
+OBJECTS += $(OBJDIR)/cylinder.o
+OBJECTS += $(OBJDIR)/loadobj.o
 OBJECTS += $(OBJDIR)/main.o
+OBJECTS += $(OBJDIR)/simple_mesh.o
 
 # Rules
 # #############################################
@@ -130,7 +138,19 @@ endif
 # File Rules
 # #############################################
 
+$(OBJDIR)/cone.o: cone.cpp
+	@echo $(notdir $<)
+	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
+$(OBJDIR)/cylinder.o: cylinder.cpp
+	@echo $(notdir $<)
+	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
+$(OBJDIR)/loadobj.o: loadobj.cpp
+	@echo $(notdir $<)
+	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
 $(OBJDIR)/main.o: main.cpp
+	@echo $(notdir $<)
+	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
+$(OBJDIR)/simple_mesh.o: simple_mesh.cpp
 	@echo $(notdir $<)
 	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
 
