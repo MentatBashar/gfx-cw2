@@ -6,6 +6,7 @@
 
 #include <cstdio>
 #include <cstdlib>
+#include <cmath>
 
 #include "../support/error.hpp"
 #include "../support/program.hpp"
@@ -38,7 +39,9 @@ namespace
       bool cameraActive;
       bool actionZoomIn, actionZoomOut;
 
-      float phi, theta;
+      float posX, posY, posZ;
+
+      float yaw, pitch;
       float radius;
 
       float lastX, lastY;
@@ -147,7 +150,7 @@ int main() try
   glEnable(GL_FRAMEBUFFER_SRGB);
   glEnable(GL_CULL_FACE);
   glEnable(GL_DEPTH_TEST);
-  glClearColor(0.2f, 0.2f, 0.2f, 0.0f);
+  glClearColor(0.5f, 0.85f, 9.f, 0.0f);
 
   OGL_CHECKPOINT_ALWAYS();
 
@@ -167,6 +170,9 @@ int main() try
       } );
 
   state.prog = &prog;
+  state.camControl.posX = 10.f;
+  state.camControl.posY = 0.f;
+  state.camControl.posZ = 10.f;
   state.camControl.radius = 10.f;
 
   // Animation state
@@ -219,14 +225,21 @@ int main() try
     // Update state
     //TODO: update state
     auto const now = Clock::now();
-    float dt = std::chrono::duration_cast<Secondsf>(now-last).count();
     last = now;
 
     // Update camera state
     if( state.camControl.actionZoomIn )
-      state.camControl.radius -= kMovementPerSecond_ * dt;
+    {
+      float yaw = state.camControl.yaw;
+      state.camControl.posX += cos(yaw);
+      state.camControl.posZ -= sin(yaw);
+    }
     else if( state.camControl.actionZoomOut )
-      state.camControl.radius += kMovementPerSecond_ * dt;
+    {
+      float yaw = state.camControl.yaw;
+      state.camControl.posX -= cos(yaw);
+      state.camControl.posZ += sin(yaw);
+    }
 
     if( state.camControl.radius <= 0.1f )
       state.camControl.radius = 0.1f;
@@ -235,11 +248,17 @@ int main() try
     //TODO: define and compute projCameraWorld matrix
     Mat44f model2world = make_rotation_y(angle);
 
-    Mat44f Rx = make_rotation_x(state.camControl.theta);;
-    Mat44f Ry = make_rotation_y(state.camControl.phi);
-    Mat44f T = make_translation({0.f, 0.f, -state.camControl.radius});
+    Mat44f Rx = make_rotation_x(state.camControl.pitch);
+    Mat44f Ry = make_rotation_y(state.camControl.yaw);
+    Mat44f T = make_translation({state.camControl.posX,
+                                 state.camControl.posY,
+                                 -state.camControl.posZ});
 
-    Mat44f world2camera = T * Rx * Ry;
+    // First person camera
+    Mat44f world2camera = Rx * Ry * T;
+
+    // Arc-ball camera
+    // Mat44f world2camera = T * Rx * Ry;
 
     Mat44f projection = make_perspective_projection(
         60.f * kPi_ / 180.f,
@@ -315,25 +334,6 @@ namespace
 
     if( auto* state = static_cast<State_*>(glfwGetWindowUserPointer( aWindow )) )
     {
-      // R-key reloads shaders.
-      if( GLFW_KEY_R == aKey && GLFW_PRESS == aAction )
-      {
-        if( state->prog )
-        {
-          try
-          {
-            state->prog->reload();
-            std::fprintf( stderr, "Shaders reloaded and recompiled.\n" );
-          }
-          catch( std::exception const& eErr )
-          {
-            std::fprintf( stderr, "Error when reloading shader:\n" );
-            std::fprintf( stderr, "%s\n", eErr.what() );
-            std::fprintf( stderr, "Keeping old shader.\n" );
-          }
-        }
-      }
-
       // Space toggles camera
       if( GLFW_KEY_SPACE == aKey && GLFW_PRESS == aAction )
       {
@@ -375,13 +375,17 @@ namespace
         auto const dx = float(aX-state->camControl.lastX);
         auto const dy = float(aY-state->camControl.lastY);
 
-        state->camControl.phi += dx*kMouseSensitivity_;
+        state->camControl.yaw += dx*kMouseSensitivity_;
+        if(state->camControl.yaw > 2.f * kPi_)
+          state->camControl.yaw  = -2.f * kPi_;
+        else if(state->camControl.yaw < -2.f * kPi_)
+          state->camControl.yaw = 2.f * kPi_;
 
-        state->camControl.theta += dy*kMouseSensitivity_;
-        if( state->camControl.theta > kPi_/2.f )
-          state->camControl.theta = kPi_/2.f;
-        else if( state->camControl.theta < -kPi_/2.f )
-          state->camControl.theta = -kPi_/2.f;
+        state->camControl.pitch += dy*kMouseSensitivity_;
+        if( state->camControl.pitch > kPi_/2.f )
+          state->camControl.pitch = kPi_/2.f;
+        else if( state->camControl.pitch < -kPi_/2.f )
+          state->camControl.pitch = -kPi_/2.f;
       }
 
       state->camControl.lastX = float(aX);
