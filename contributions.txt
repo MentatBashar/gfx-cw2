@@ -1,3 +1,9 @@
 Task 1.1:
 
 All three members had written their own matrix functions for this task, however Charlie's were used because they do not use for loops to calculate the output, hence they should be slightly faster.
+
+Task 1.2
+
+Charlie set up a program that could load the .obj file.
+Charlie set up a perspetive projection for rendering.
+Charlie Set up the simplified directional light model.
