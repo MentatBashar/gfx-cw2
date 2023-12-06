@@ -37,7 +37,7 @@ namespace
     struct CamCtrl_
     {
       bool cameraActive;
-      bool actionZoomIn, actionZoomOut;
+      bool actionForward, actionBackward, actionLeft, actionRight;
 
       float posX, posY, posZ;
 
@@ -228,13 +228,33 @@ int main() try
     last = now;
 
     // Update camera state
-    if( state.camControl.actionZoomIn )
+    if(state.camControl.actionForward)
+    {
+      float yaw = state.camControl.yaw;
+      yaw += kPi_ / 2.f;
+      if (yaw > 2.f * kPi_)
+        yaw = -2.f * kPi_ + (2.f*kPi_ - yaw);
+
+      state.camControl.posX += cos(yaw);
+      state.camControl.posZ -= sin(yaw);
+    }
+    else if(state.camControl.actionBackward)
+    {
+      float yaw = state.camControl.yaw;
+      yaw += kPi_ / 2.f;
+      if (yaw > 2.f * kPi_)
+        yaw = -2.f * kPi_ + (2.f*kPi_ - yaw);
+
+      state.camControl.posX -= cos(yaw);
+      state.camControl.posZ += sin(yaw);
+    }
+    else if(state.camControl.actionLeft)
     {
       float yaw = state.camControl.yaw;
       state.camControl.posX += cos(yaw);
       state.camControl.posZ -= sin(yaw);
     }
-    else if( state.camControl.actionZoomOut )
+    else if(state.camControl.actionRight)
     {
       float yaw = state.camControl.yaw;
       state.camControl.posX -= cos(yaw);
@@ -351,16 +371,30 @@ namespace
         if( GLFW_KEY_W == aKey )
         {
           if( GLFW_PRESS == aAction )
-            state->camControl.actionZoomIn = true;
+            state->camControl.actionForward = true;
           else if( GLFW_RELEASE == aAction )
-            state->camControl.actionZoomIn = false;
+            state->camControl.actionForward = false;
         }
         else if( GLFW_KEY_S == aKey )
         {
           if( GLFW_PRESS == aAction )
-            state->camControl.actionZoomOut = true;
+            state->camControl.actionBackward = true;
           else if( GLFW_RELEASE == aAction )
-            state->camControl.actionZoomOut = false;
+            state->camControl.actionBackward = false;
+        }
+        else if( GLFW_KEY_A == aKey )
+        {
+          if( GLFW_PRESS == aAction )
+            state->camControl.actionLeft = true;
+          else if( GLFW_RELEASE == aAction )
+            state->camControl.actionLeft = false;
+        }
+        else if( GLFW_KEY_D == aKey )
+        {
+          if( GLFW_PRESS == aAction )
+            state->camControl.actionRight = true;
+          else if( GLFW_RELEASE == aAction )
+            state->camControl.actionRight = false;
         }
       }
     }
