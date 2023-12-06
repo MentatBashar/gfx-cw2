@@ -6,7 +6,7 @@ Each block should be done before the previous, and each task in a block can be c
 * Add vmlib tests and document them
 * Reimplement all the camera controls so that we aren't accused of stealing them
 * Add first-person camera controls
-* Add simplfied directional light model
+X Add simplfied directional light model
 * Add terrain texture
 
 * Load the launchpad 'once' and colour it properly

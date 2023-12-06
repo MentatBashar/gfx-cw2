@@ -9,8 +9,9 @@
 
 struct SimpleMeshData
 {
-	std::vector<Vec3f> positions;
-	std::vector<Vec3f> colors;
+  std::vector<Vec3f> positions;
+  std::vector<Vec3f> colors;
+  std::vector<Vec3f> normals;
 };
 
 SimpleMeshData concatenate( SimpleMeshData, SimpleMeshData const& );

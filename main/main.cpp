@@ -14,10 +14,9 @@
 
 #include "../vmlib/vec4.hpp"
 #include "../vmlib/mat44.hpp"
+#include "../vmlib/mat33.hpp"
 
 #include "defaults.hpp"
-#include "cone.hpp"
-#include "cylinder.hpp"
 #include "loadobj.hpp"
 
 
@@ -182,47 +181,6 @@ int main() try
 
   // Create vertex buffers and VAO
 
-  auto xcy = make_cylinder(true, 16, {1.f, 0.f, 0.f},
-      make_scaling(5.f, 0.1f, 0.1f)
-      );
-  auto xcone = make_cone(true, 16, {0.f, 0.f, 0.f},
-      make_scaling(1.f, 0.3f, 0.3f) *
-      make_translation({5.f, 0.f, 0.f})
-      );
-  auto xarrow = concatenate(std::move(xcy), xcone);
-
-
-  auto ycy = make_cylinder(true, 16, {0.f, 1.f, 0.f},
-      make_rotation_z({3.1415926f / 2.f}) *
-      make_scaling(5.f, 0.1f, 0.1f)
-      );
-  auto ycone = make_cone(true, 16, {0.f, 0.f, 0.f},
-      make_rotation_z({3.1415926f / 2.f}) *
-      make_scaling(1.f, 0.3f, 0.3f) *
-      make_translation({5.f, 0.f, 0.f})
-      );
-  auto yarrow = concatenate(std::move(ycy), ycone);
-
-
-  auto zcy = make_cylinder(true, 16, {0.f, 0.f, 1.f},
-      make_rotation_y({3*3.1415926f / 2.f}) *
-      make_scaling(5.f, 0.1f, 0.1f)
-      );
-  auto zcone = make_cone(true, 16, {0.f, 0.f, 0.f},
-      make_rotation_y({3*3.1415926f / 2.f}) *
-      make_scaling(1.f, 0.3f, 0.3f) * 
-      make_translation({5.f, 0.f, 0.f})
-      );
-  auto zarrow = concatenate(std::move(zcy), zcone);
-
-
-  auto xyarrow = concatenate(std::move(xarrow), yarrow);
-  auto axis = concatenate(std::move(xyarrow), zarrow);
-
-  GLuint axis_vao = create_vao(axis);
-  std::size_t vertexCount = axis.positions.size();
-
-
   auto terrain_mesh = load_wavefront_obj("assets/parlahti.obj");
   GLuint terrain_vao = create_vao(terrain_mesh);
   std::size_t terrainVertexCount = terrain_mesh.positions.size();
@@ -291,6 +249,8 @@ int main() try
 
     Mat44f projCameraWorld = projection * world2camera * model2world;
 
+    Mat33f normalMatrix = mat44_to_mat33(transpose(invert(model2world)));
+
     // Draw scene
     OGL_CHECKPOINT_DEBUG();
 
@@ -304,9 +264,15 @@ int main() try
         1, GL_TRUE, projCameraWorld.v
         );
 
-    glBindVertexArray(axis_vao);
-    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-    glDrawArrays(GL_TRIANGLES, 0, vertexCount);
+    glUniformMatrix3fv(
+      1,
+      1, GL_TRUE, normalMatrix.v
+    );
+
+    Vec3f lightDir = normalize(Vec3f{0.f, 1.f, -1.f});
+    glUniform3fv(2, 1, &lightDir.x);
+    glUniform3f(3, 0.9f, 0.9f, 0.9f);
+    glUniform3f(4, 0.05f, 0.05f, 0.05f);
 
     glBindVertexArray(terrain_vao);
     glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
