@@ -20,6 +20,8 @@
 #include "defaults.hpp"
 #include "loadobj.hpp"
 
+#include <iostream>
+
 
 namespace
 {
@@ -27,25 +29,31 @@ namespace
 
   constexpr float kPi_ = 3.1415926f;
 
-  constexpr float kMovementPerSecond_ = 5.f; // units per second
   constexpr float kMouseSensitivity_ = 0.01f; // radians per pixel
 
   struct State_
   {
     ShaderProgram* prog;
 
-    struct CamCtrl_
+    struct Camera_
     {
       bool cameraActive;
-      bool actionForward, actionBackward, actionLeft, actionRight;
+      bool
+      actionForward,
+      actionBackward,
+      actionLeft,
+      actionRight,
+      actionUp,
+      actionDown;
+
+      float speedMul;
 
       float posX, posY, posZ;
 
       float yaw, pitch;
-      float radius;
 
       float lastX, lastY;
-    } camControl;
+    } camera;
   };
 
   void glfw_callback_error_( int, char const* );
@@ -170,10 +178,10 @@ int main() try
       } );
 
   state.prog = &prog;
-  state.camControl.posX = 10.f;
-  state.camControl.posY = 0.f;
-  state.camControl.posZ = 10.f;
-  state.camControl.radius = 10.f;
+  state.camera.posX = 0.f;
+  state.camera.posY = 5.f;
+  state.camera.posZ = 0.f;
+  state.camera.speedMul = 1.f;
 
   // Animation state
   auto last = Clock::now();
@@ -228,51 +236,56 @@ int main() try
     last = now;
 
     // Update camera state
-    if(state.camControl.actionForward)
+    if(state.camera.actionForward)
     {
-      float yaw = state.camControl.yaw;
+      float yaw = state.camera.yaw;
       yaw += kPi_ / 2.f;
       if (yaw > 2.f * kPi_)
         yaw = -2.f * kPi_ + (2.f*kPi_ - yaw);
 
-      state.camControl.posX += cos(yaw);
-      state.camControl.posZ -= sin(yaw);
+      state.camera.posX += cos(yaw) * state.camera.speedMul;
+      state.camera.posZ -= sin(yaw) * state.camera.speedMul;
     }
-    else if(state.camControl.actionBackward)
+    else if(state.camera.actionBackward)
     {
-      float yaw = state.camControl.yaw;
+      float yaw = state.camera.yaw;
       yaw += kPi_ / 2.f;
       if (yaw > 2.f * kPi_)
         yaw = -2.f * kPi_ + (2.f*kPi_ - yaw);
 
-      state.camControl.posX -= cos(yaw);
-      state.camControl.posZ += sin(yaw);
+      state.camera.posX -= cos(yaw) * state.camera.speedMul;
+      state.camera.posZ += sin(yaw) * state.camera.speedMul;
     }
-    else if(state.camControl.actionLeft)
+    else if(state.camera.actionLeft)
     {
-      float yaw = state.camControl.yaw;
-      state.camControl.posX += cos(yaw);
-      state.camControl.posZ -= sin(yaw);
+      float yaw = state.camera.yaw;
+      state.camera.posX += cos(yaw) * state.camera.speedMul;
+      state.camera.posZ -= sin(yaw) * state.camera.speedMul;
     }
-    else if(state.camControl.actionRight)
+    else if(state.camera.actionRight)
     {
-      float yaw = state.camControl.yaw;
-      state.camControl.posX -= cos(yaw);
-      state.camControl.posZ += sin(yaw);
+      float yaw = state.camera.yaw;
+      state.camera.posX -= cos(yaw) * state.camera.speedMul;
+      state.camera.posZ += sin(yaw) * state.camera.speedMul;
     }
-
-    if( state.camControl.radius <= 0.1f )
-      state.camControl.radius = 0.1f;
+    else if(state.camera.actionUp)
+    {
+      state.camera.posY += 0.2f * state.camera.speedMul;
+    }
+    else if(state.camera.actionDown)
+    {
+      state.camera.posY -= 0.2f * state.camera.speedMul;
+    }
 
     // Update: compute matrices
     //TODO: define and compute projCameraWorld matrix
     Mat44f model2world = make_rotation_y(angle);
 
-    Mat44f Rx = make_rotation_x(state.camControl.pitch);
-    Mat44f Ry = make_rotation_y(state.camControl.yaw);
-    Mat44f T = make_translation({state.camControl.posX,
-                                 state.camControl.posY,
-                                 -state.camControl.posZ});
+    Mat44f Rx = make_rotation_x(state.camera.pitch);
+    Mat44f Ry = make_rotation_y(state.camera.yaw);
+    Mat44f T = make_translation({state.camera.posX,
+                                 -state.camera.posY,
+                                 -state.camera.posZ});
 
     // First person camera
     Mat44f world2camera = Rx * Ry * T;
@@ -357,44 +370,72 @@ namespace
       // Space toggles camera
       if( GLFW_KEY_SPACE == aKey && GLFW_PRESS == aAction )
       {
-        state->camControl.cameraActive = !state->camControl.cameraActive;
+        state->camera.cameraActive = !state->camera.cameraActive;
 
-        if( state->camControl.cameraActive )
+        if( state->camera.cameraActive )
           glfwSetInputMode( aWindow, GLFW_CURSOR, GLFW_CURSOR_HIDDEN );
         else
           glfwSetInputMode( aWindow, GLFW_CURSOR, GLFW_CURSOR_NORMAL );
       }
 
       // Camera controls if camera is active
-      if( state->camControl.cameraActive )
+      if( state->camera.cameraActive )
       {
         if( GLFW_KEY_W == aKey )
         {
           if( GLFW_PRESS == aAction )
-            state->camControl.actionForward = true;
+            state->camera.actionForward = true;
           else if( GLFW_RELEASE == aAction )
-            state->camControl.actionForward = false;
+            state->camera.actionForward = false;
         }
         else if( GLFW_KEY_S == aKey )
         {
           if( GLFW_PRESS == aAction )
-            state->camControl.actionBackward = true;
+            state->camera.actionBackward = true;
           else if( GLFW_RELEASE == aAction )
-            state->camControl.actionBackward = false;
+            state->camera.actionBackward = false;
         }
         else if( GLFW_KEY_A == aKey )
         {
           if( GLFW_PRESS == aAction )
-            state->camControl.actionLeft = true;
+            state->camera.actionLeft = true;
           else if( GLFW_RELEASE == aAction )
-            state->camControl.actionLeft = false;
+            state->camera.actionLeft = false;
         }
         else if( GLFW_KEY_D == aKey )
         {
           if( GLFW_PRESS == aAction )
-            state->camControl.actionRight = true;
+            state->camera.actionRight = true;
           else if( GLFW_RELEASE == aAction )
-            state->camControl.actionRight = false;
+            state->camera.actionRight = false;
+        }
+        else if( GLFW_KEY_Q == aKey )
+        {
+          if( GLFW_PRESS == aAction )
+            state->camera.actionUp = true;
+          else if( GLFW_RELEASE == aAction )
+            state->camera.actionUp = false;
+        }
+        else if( GLFW_KEY_E == aKey )
+        {
+          if( GLFW_PRESS == aAction )
+            state->camera.actionDown = true;
+          else if( GLFW_RELEASE == aAction )
+            state->camera.actionDown = false;
+        }
+        else if( GLFW_KEY_LEFT_SHIFT == aKey )
+        {
+          if( GLFW_PRESS == aAction )
+            state->camera.speedMul= 2.f;
+          else if( GLFW_RELEASE == aAction )
+            state->camera.speedMul = 1.f;
+        }
+        else if( GLFW_KEY_LEFT_CONTROL == aKey )
+        {
+          if( GLFW_PRESS == aAction )
+            state->camera.speedMul = 0.5f;
+          else if( GLFW_RELEASE == aAction )
+            state->camera.speedMul = 1.f;
         }
       }
     }
@@ -404,26 +445,40 @@ namespace
   {
     if( auto* state = static_cast<State_*>(glfwGetWindowUserPointer( aWindow )) )
     {
-      if( state->camControl.cameraActive )
+      if(state->camera.cameraActive)
       {
-        auto const dx = float(aX-state->camControl.lastX);
-        auto const dy = float(aY-state->camControl.lastY);
+        auto const dx = float(aX-state->camera.lastX);
+        auto const dy = float(aY-state->camera.lastY);
 
-        state->camControl.yaw += dx*kMouseSensitivity_;
-        if(state->camControl.yaw > 2.f * kPi_)
-          state->camControl.yaw  = -2.f * kPi_;
-        else if(state->camControl.yaw < -2.f * kPi_)
-          state->camControl.yaw = 2.f * kPi_;
+        state->camera.yaw += dx*kMouseSensitivity_;
 
-        state->camControl.pitch += dy*kMouseSensitivity_;
-        if( state->camControl.pitch > kPi_/2.f )
-          state->camControl.pitch = kPi_/2.f;
-        else if( state->camControl.pitch < -kPi_/2.f )
-          state->camControl.pitch = -kPi_/2.f;
+        // The most duct-tape solution to clamping the camera yaw between
+        // 2*pi and -2*pi you have ever seen. And it works apparently!
+        if (state->camera.yaw > 0)
+          state->camera.yaw = -128.f * kPi_;
+
+        /* No, I don't why this doesn't work.
+        if(state->camera.yaw > 2.f * kPi_)
+        {
+          std::cout << state->camera.yaw << std::endl;
+          state->camera.yaw = (-2.f * kPi_) + (state->camera.yaw - 2.f*kPi_);
+        }
+        else if(state->camera.yaw < -2.f * kPi_)
+        {
+          std::cout << state->camera.yaw << std::endl;
+          state->camera.yaw = (2.f*kPi_) + (state->camera.yaw - 2.f*kPi_);
+        }
+        */
+
+        state->camera.pitch += dy*kMouseSensitivity_;
+        if( state->camera.pitch > kPi_/2.f )
+          state->camera.pitch = kPi_/2.f;
+        else if( state->camera.pitch < -kPi_/2.f )
+          state->camera.pitch = -kPi_/2.f;
       }
 
-      state->camControl.lastX = float(aX);
-      state->camControl.lastY = float(aY);
+      state->camera.lastX = float(aX);
+      state->camera.lastY = float(aY);
     }
   }
 }
