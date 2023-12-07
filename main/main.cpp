@@ -206,7 +206,6 @@ int main() try
   GLuint terrain_vao = create_vao(terrain_mesh);
   std::size_t terrainVertexCount = terrain_mesh.positions.size();
 
-  //auto spaceship_mesh = make_spaceship();
   auto spaceship_mesh = make_spaceship();
   GLuint spaceship_vao = create_vao(spaceship_mesh);
   std::size_t spaceshipVertexCount = spaceship_mesh.positions.size();

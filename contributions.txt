@@ -8,3 +8,4 @@ Charlie set up a program that could load the .obj file.
 Charlie set up a perspetive projection for rendering.
 Charlie Set up the simplified directional light model.
 Charlie set up the first-person camera controls.
+Charlie created the spaceship model
