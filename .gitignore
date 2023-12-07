@@ -1,5 +1,6 @@
 _build_/
 bin/
+lib/
 
 .DS_Store
 

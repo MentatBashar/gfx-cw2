@@ -150,6 +150,17 @@ int main() try
   setup_gl_debug_output();
 #	endif // ~ !NDEBUG
 
+  // Setup paths
+#if defined(WIN32)
+  const char* defaultVertexShaderPath = "../assets/default.vert";
+  const char* defaultFragmentShaderPath = "../assets/default.frag";
+  const char* terrainObjPath = "../assets/parlahti.obj";
+#else
+  const char* defaultVertexShaderPath = "assets/default.vert";
+  const char* defaultFragmentShaderPath = "assets/default.frag";
+  const char* terrainObjPath = "assets/parlahti.obj";
+#endif
+
   // Global GL state
   OGL_CHECKPOINT_ALWAYS();
 
@@ -172,8 +183,8 @@ int main() try
 
   // Loads the shader program
   ShaderProgram prog( {
-      { GL_VERTEX_SHADER, "assets/default.vert" },
-      { GL_FRAGMENT_SHADER, "assets/default.frag" }
+      { GL_VERTEX_SHADER, defaultVertexShaderPath },
+      { GL_FRAGMENT_SHADER, defaultFragmentShaderPath }
       } );
 
   state.prog = &prog;
@@ -191,7 +202,7 @@ int main() try
   OGL_CHECKPOINT_ALWAYS();
 
   // Create vertex buffers and VAO
-  auto terrain_mesh = load_wavefront_obj("assets/parlahti.obj");
+  auto terrain_mesh = load_wavefront_obj(terrainObjPath);
   GLuint terrain_vao = create_vao(terrain_mesh);
   std::size_t terrainVertexCount = terrain_mesh.positions.size();
 
