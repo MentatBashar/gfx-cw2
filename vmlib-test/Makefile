@@ -66,7 +66,13 @@ GENERATED :=
 OBJECTS :=
 
 GENERATED += $(OBJDIR)/empty.o
+GENERATED += $(OBJDIR)/mat44-mult.o
+GENERATED += $(OBJDIR)/mat44-project.o
+GENERATED += $(OBJDIR)/mat44-rotation.o
 OBJECTS += $(OBJDIR)/empty.o
+OBJECTS += $(OBJDIR)/mat44-mult.o
+OBJECTS += $(OBJDIR)/mat44-project.o
+OBJECTS += $(OBJDIR)/mat44-rotation.o
 
 # Rules
 # #############################################
@@ -131,6 +137,15 @@ endif
 # #############################################
 
 $(OBJDIR)/empty.o: empty.cpp
+	@echo $(notdir $<)
+	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
+$(OBJDIR)/mat44-mult.o: mat44-mult.cpp
+	@echo $(notdir $<)
+	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
+$(OBJDIR)/mat44-project.o: mat44-project.cpp
+	@echo $(notdir $<)
+	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
+$(OBJDIR)/mat44-rotation.o: mat44-rotation.cpp
 	@echo $(notdir $<)
 	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
 

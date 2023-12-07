@@ -19,8 +19,7 @@
 
 #include "defaults.hpp"
 #include "loadobj.hpp"
-
-#include <iostream>
+#include "spaceship.hpp"
 
 
 namespace
@@ -191,13 +190,15 @@ int main() try
   // Other initialization & loading
   OGL_CHECKPOINT_ALWAYS();
 
-  // TODO: global GL setup goes here
-
   // Create vertex buffers and VAO
-
   auto terrain_mesh = load_wavefront_obj("assets/parlahti.obj");
   GLuint terrain_vao = create_vao(terrain_mesh);
   std::size_t terrainVertexCount = terrain_mesh.positions.size();
+
+  //auto spaceship_mesh = make_spaceship();
+  auto spaceship_mesh = make_spaceship();
+  GLuint spaceship_vao = create_vao(spaceship_mesh);
+  std::size_t spaceshipVertexCount = spaceship_mesh.positions.size();
 
   OGL_CHECKPOINT_ALWAYS();
 
@@ -231,7 +232,6 @@ int main() try
     }
 
     // Update state
-    //TODO: update state
     auto const now = Clock::now();
     last = now;
 
@@ -329,6 +329,10 @@ int main() try
     glBindVertexArray(terrain_vao);
     glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
     glDrawArrays(GL_TRIANGLES, 0, terrainVertexCount);
+
+    glBindVertexArray(spaceship_vao);
+    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+    glDrawArrays(GL_TRIANGLES, 0, spaceshipVertexCount);
 
     OGL_CHECKPOINT_DEBUG();
 
@@ -460,12 +464,10 @@ namespace
         /* No, I don't why this doesn't work.
         if(state->camera.yaw > 2.f * kPi_)
         {
-          std::cout << state->camera.yaw << std::endl;
           state->camera.yaw = (-2.f * kPi_) + (state->camera.yaw - 2.f*kPi_);
         }
         else if(state->camera.yaw < -2.f * kPi_)
         {
-          std::cout << state->camera.yaw << std::endl;
           state->camera.yaw = (2.f*kPi_) + (state->camera.yaw - 2.f*kPi_);
         }
         */

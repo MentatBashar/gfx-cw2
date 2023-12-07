@@ -1,17 +1,41 @@
 #include "simple_mesh.hpp"
 
-SimpleMeshData concatenate( SimpleMeshData aM, SimpleMeshData const& aN )
+SimpleMeshData mergeMeshes(std::vector<SimpleMeshData> const meshes)
 {
-	aM.positions.insert( aM.positions.end(), aN.positions.begin(), aN.positions.end() );
-	aM.colors.insert( aM.colors.end(), aN.colors.begin(), aN.colors.end() );
-	aM.normals.insert( aM.normals.end(), aN.normals.begin(), aN.normals.end() );
-	return aM;
+  SimpleMeshData newMesh;
+
+  for (auto& mesh : meshes)
+  {
+    newMesh.positions.insert(newMesh.positions.end(), mesh.positions.begin(), mesh.positions.end() );
+    newMesh.colors.insert(newMesh.colors.end(), mesh.colors.begin(), mesh.colors.end() );
+    newMesh.normals.insert(newMesh.normals.end(), mesh.normals.begin(), mesh.normals.end() );
+  }
+
+  return newMesh;
 }
 
+SimpleMeshData scaleMesh(SimpleMeshData mesh, Mat44f aScaleTransform)
+{
+  for (auto& p : mesh.positions)
+  {
+    Vec4f p4{p.x, p.y, p.z, 1.f};
+    Vec4f t = aScaleTransform * p4;
+    t /= t.w;
+
+    p = Vec3f{t.x, t.y, t.z};
+  }
+
+  Mat33f const N = mat44_to_mat33(transpose(invert(aScaleTransform)));
+  for (auto& n : mesh.normals)
+  {
+    n = normalize(N * n);
+  }
+
+  return mesh;
+}
 
 GLuint create_vao( SimpleMeshData const& aMeshData )
 {
-	//TODO: implement me
   GLuint positionVBO = 0;
   glGenBuffers(1, &positionVBO);
   glBindBuffer(GL_ARRAY_BUFFER, positionVBO);
@@ -33,34 +57,34 @@ GLuint create_vao( SimpleMeshData const& aMeshData )
 
   glBindBuffer(GL_ARRAY_BUFFER, positionVBO);
   glVertexAttribPointer(
-    0,
-    3, GL_FLOAT, GL_FALSE,
-    0,
-    0
-  );
+      0,
+      3, GL_FLOAT, GL_FALSE,
+      0,
+      0
+      );
   glEnableVertexAttribArray(0);
 
   glBindBuffer(GL_ARRAY_BUFFER, colorVBO);
   glVertexAttribPointer(
-    1,
-    3, GL_FLOAT, GL_FALSE,
-    0,
-    0
-  );
+      1,
+      3, GL_FLOAT, GL_FALSE,
+      0,
+      0
+      );
   glEnableVertexAttribArray(1);
 
   glBindBuffer(GL_ARRAY_BUFFER, normalVBO);
   glVertexAttribPointer(
-    2,
-    3, GL_FLOAT, GL_FALSE,
-    0,
-    0
-  );
+      2,
+      3, GL_FLOAT, GL_FALSE,
+      0,
+      0
+      );
   glEnableVertexAttribArray(2);
 
   glBindVertexArray(0);
   glBindBuffer(GL_ARRAY_BUFFER, 0);
-  
+
   glDeleteBuffers(1, &positionVBO);
   glDeleteBuffers(1, &colorVBO);
   glDeleteBuffers(1, &normalVBO);

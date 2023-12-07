@@ -64,9 +64,7 @@ GENERATED :=
 OBJECTS :=
 
 GENERATED += $(OBJDIR)/empty.o
-GENERATED += $(OBJDIR)/mat44.o
 OBJECTS += $(OBJDIR)/empty.o
-OBJECTS += $(OBJDIR)/mat44.o
 
 # Rules
 # #############################################
@@ -131,9 +129,6 @@ endif
 # #############################################
 
 $(OBJDIR)/empty.o: empty.cpp
-	@echo $(notdir $<)
-	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
-$(OBJDIR)/mat44.o: mat44.cpp
 	@echo $(notdir $<)
 	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
 
