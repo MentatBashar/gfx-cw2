@@ -296,7 +296,7 @@ int main() try
     Mat44f projection = make_perspective_projection(
         60.f * kPi_ / 180.f,
         fbwidth/float(fbheight),
-        0.1f, 150.f
+        0.1f, 200.f
         );
 
     Mat44f projCameraWorld = projection * world2camera * model2world;
