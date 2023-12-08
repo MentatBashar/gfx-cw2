@@ -6,6 +6,8 @@ lib/
 
 *.swp
 
+.vxproj.*
+
 # Prerequisites
 *.d
 
