@@ -67,11 +67,11 @@ OBJECTS :=
 
 GENERATED += $(OBJDIR)/loadobj.o
 GENERATED += $(OBJDIR)/main.o
-GENERATED += $(OBJDIR)/simple_mesh.o
+GENERATED += $(OBJDIR)/mesh.o
 GENERATED += $(OBJDIR)/spaceship.o
 OBJECTS += $(OBJDIR)/loadobj.o
 OBJECTS += $(OBJDIR)/main.o
-OBJECTS += $(OBJDIR)/simple_mesh.o
+OBJECTS += $(OBJDIR)/mesh.o
 OBJECTS += $(OBJDIR)/spaceship.o
 
 # Rules
@@ -142,7 +142,7 @@ $(OBJDIR)/loadobj.o: loadobj.cpp
 $(OBJDIR)/main.o: main.cpp
 	@echo $(notdir $<)
 	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
-$(OBJDIR)/simple_mesh.o: simple_mesh.cpp
+$(OBJDIR)/mesh.o: mesh.cpp
 	@echo $(notdir $<)
 	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
 $(OBJDIR)/spaceship.o: spaceship.cpp

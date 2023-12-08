@@ -1,8 +1,8 @@
-#include "simple_mesh.hpp"
+#include "mesh.hpp"
 
-SimpleMeshData mergeMeshes(std::vector<SimpleMeshData> const meshes)
+MeshData mergeMeshes(std::vector<MeshData> const meshes)
 {
-  SimpleMeshData newMesh;
+  MeshData newMesh;
 
   for (auto& mesh : meshes)
   {
@@ -14,18 +14,18 @@ SimpleMeshData mergeMeshes(std::vector<SimpleMeshData> const meshes)
   return newMesh;
 }
 
-SimpleMeshData scaleMesh(SimpleMeshData mesh, Mat44f aScaleTransform)
+MeshData transformMesh(MeshData mesh, Mat44f aTransform)
 {
   for (auto& p : mesh.positions)
   {
     Vec4f p4{p.x, p.y, p.z, 1.f};
-    Vec4f t = aScaleTransform * p4;
+    Vec4f t = aTransform * p4;
     t /= t.w;
 
     p = Vec3f{t.x, t.y, t.z};
   }
 
-  Mat33f const N = mat44_to_mat33(transpose(invert(aScaleTransform)));
+  Mat33f const N = mat44_to_mat33(transpose(invert(aTransform)));
   for (auto& n : mesh.normals)
   {
     n = normalize(N * n);
@@ -34,7 +34,8 @@ SimpleMeshData scaleMesh(SimpleMeshData mesh, Mat44f aScaleTransform)
   return mesh;
 }
 
-GLuint create_vao( SimpleMeshData const& aMeshData )
+
+GLuint create_vao( MeshData const& aMeshData )
 {
   GLuint positionVBO = 0;
   glGenBuffers(1, &positionVBO);

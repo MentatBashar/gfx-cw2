@@ -19,6 +19,7 @@
 
 #include "defaults.hpp"
 #include "loadobj.hpp"
+#include "mesh.hpp"
 #include "spaceship.hpp"
 
 
@@ -212,6 +213,8 @@ int main() try
 
   OGL_CHECKPOINT_ALWAYS();
 
+  float spaceship_clock = 0.f;
+
   // Main loop
   while( !glfwWindowShouldClose( window ) )
   {
@@ -243,6 +246,7 @@ int main() try
 
     // Update state
     auto const now = Clock::now();
+    float dt = std::chrono::duration_cast<Secondsf>(now-last).count();
     last = now;
 
     // Update camera state
@@ -286,6 +290,11 @@ int main() try
     {
       state.camera.posY -= 0.2f * state.camera.speedMul;
     }
+
+    // Update: move spaceship
+    spaceship_clock += dt;
+    spaceship_mesh = move_spaceship(spaceship_mesh, spaceship_clock);
+    GLuint spaceship_vao = create_vao(spaceship_mesh);
 
     // Update: compute matrices
     //TODO: define and compute projCameraWorld matrix

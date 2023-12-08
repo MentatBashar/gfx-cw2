@@ -4,7 +4,7 @@
 
 #include "../support/error.hpp"
 
-SimpleMeshData load_wavefront_obj( char const* aPath )
+MeshData load_wavefront_obj( char const* aPath )
 {
   auto result = rapidobj::ParseFile(aPath);
   if (result.error)
@@ -12,7 +12,7 @@ SimpleMeshData load_wavefront_obj( char const* aPath )
 
   rapidobj::Triangulate(result);
 
-  SimpleMeshData ret;
+  MeshData ret;
 
   for (auto const& shape : result.shapes)
   {

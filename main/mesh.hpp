@@ -9,16 +9,16 @@
 #include "../vmlib/mat44.hpp"
 #include "../vmlib/mat33.hpp"
 
-struct SimpleMeshData
+struct MeshData
 {
   std::vector<Vec3f> positions;
   std::vector<Vec3f> colors;
   std::vector<Vec3f> normals;
 };
 
-SimpleMeshData mergeMeshes(std::vector<SimpleMeshData> const meshes);
-SimpleMeshData scaleMesh(SimpleMeshData mesh, Mat44f aScaleTransform);
+MeshData mergeMeshes(std::vector<MeshData> const meshes);
+MeshData transformMesh(MeshData mesh, Mat44f aTransform);
 
-GLuint create_vao( SimpleMeshData const& );
+GLuint create_vao(MeshData const&);
 
 #endif // MESH_HPP

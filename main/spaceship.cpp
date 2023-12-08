@@ -1,20 +1,41 @@
+#include <cmath>
+
 #include "spaceship.hpp"
 #include <iostream>
 
-SimpleMeshData make_spaceship()
+
+MeshData move_spaceship(MeshData spaceship_mesh, float t)
 {
-/* TEST STUFF
-  auto cy = make_cylinder(true, 128, {1.f, 0.2f, 0.2f},
-                          make_rotation_y(3.141592f / 4.f) *
-                          make_scaling(5.f, .2f, .2f)
-                         );
+ /*
+  * Use three quadratic equations to model the movement of the ship in three
+  * planes.
+  *
+  * These equations are plotted with {x,y,x} in respect to t. Because of this,
+  * there is no reason to store the current position of the spaceship anywhere.
+  *
+  * For the sake of simplicity, x and z will have the same equation, and y will
+  * have one that has a slightly shallower slope.
+  */
 
-  auto cone = make_cone(true, 128, {0.f, 1.f, 0.f},
-                        make_scaling(1.f, 0.3f, 0.3f) *
-                        make_translation({5.f, 0.f, 0.f})
-                       );
-*/
+  // Equations:
+  //
+  // x = -(t-80)^2 / 128 + 50
+  // y = (t^2) / 1024
+  
+  float newX, newY, rotZ;
 
+  newX = std::pow(t, 2) / 2048.f;
+  newY = std::pow(t, 2) / 1024.f;
+
+  rotZ = t / 1024.f;
+
+  return transformMesh(spaceship_mesh,
+                       make_rotation_z(rotZ) *
+                       make_translation({newX, newY, 0.f}));
+}
+
+MeshData make_spaceship()
+{
   auto tank1_body = make_cylinder(true, 128, {1.f, 0.2f, 0.2f},
                                  make_rotation_z(3.141592f / 2.f) *
                                  make_scaling(3.f, .5f, .5f) *
@@ -86,7 +107,7 @@ SimpleMeshData make_spaceship()
                                      make_scaling(1.2f, .5f, .5f) *
                                      make_translation({4.f, 0.f, 0.f}));
 
-  std::vector<SimpleMeshData> meshList = {
+  std::vector<MeshData> meshList = {
     tank1_body,
     tank1_lower_cone,
     tank1_upper_cone,
@@ -107,12 +128,13 @@ SimpleMeshData make_spaceship()
 
   auto spaceship_mesh = mergeMeshes(meshList);
   
-  spaceship_mesh = scaleMesh(spaceship_mesh, make_scaling(0.4f, 0.4f, 0.4f));
+  spaceship_mesh = transformMesh(spaceship_mesh,
+                                 make_scaling(0.4f, 0.4f, 0.4f));
 
   return spaceship_mesh;
 }
 
-SimpleMeshData make_cube(Vec3f aColor, Mat44f aPreTransform)
+MeshData make_cube(Vec3f aColor, Mat44f aPreTransform)
 {
   std::vector<Vec3f> pos;
   std::vector<Vec3f> nor;
@@ -220,11 +242,11 @@ SimpleMeshData make_cube(Vec3f aColor, Mat44f aPreTransform)
     n = normalize(N * n);
   }
 
-  return SimpleMeshData{std::move(pos), std::move(col), std::move(nor)};
+  return MeshData{std::move(pos), std::move(col), std::move(nor)};
 }
 
 
-SimpleMeshData make_cylinder( bool aCapped, std::size_t aSubdivs, Vec3f aColor, Mat44f aPreTransform )
+MeshData make_cylinder( bool aCapped, std::size_t aSubdivs, Vec3f aColor, Mat44f aPreTransform )
 {
   std::vector<Vec3f> pos;
   std::vector<Vec3f> nor;
@@ -295,11 +317,11 @@ SimpleMeshData make_cylinder( bool aCapped, std::size_t aSubdivs, Vec3f aColor, 
     n = normalize(N * n);
   }
 
-  return SimpleMeshData{std::move(pos), std::move(col), std::move(nor)};
+  return MeshData{std::move(pos), std::move(col), std::move(nor)};
 }
 
 
-SimpleMeshData make_cone( bool aCapped, std::size_t aSubdivs, Vec3f aColor, Mat44f aPreTransform )
+MeshData make_cone( bool aCapped, std::size_t aSubdivs, Vec3f aColor, Mat44f aPreTransform )
 {
   std::vector<Vec3f> pos;
   std::vector<Vec3f> nor;
@@ -354,5 +376,5 @@ SimpleMeshData make_cone( bool aCapped, std::size_t aSubdivs, Vec3f aColor, Mat4
     n = normalize(N * n);
   }
 
-  return SimpleMeshData{std::move(pos), std::move(col), std::move(nor)};
+  return MeshData{std::move(pos), std::move(col), std::move(nor)};
 }
