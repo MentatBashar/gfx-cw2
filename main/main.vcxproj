@@ -96,9 +96,15 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="defaults.hpp" />
+    <ClInclude Include="loadobj.hpp" />
+    <ClInclude Include="mesh.hpp" />
+    <ClInclude Include="spaceship.hpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="loadobj.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="mesh.cpp" />
+    <ClCompile Include="spaceship.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\vmlib\vmlib.vcxproj">
