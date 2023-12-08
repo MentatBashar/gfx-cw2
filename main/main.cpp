@@ -54,6 +54,13 @@ namespace
 
       float lastX, lastY;
     } camera;
+
+    struct SpaceshipControls_
+    {
+      bool moving, reset;
+
+      float x, y, rotZ;
+    }spaceship_controls;
   };
 
   void glfw_callback_error_( int, char const* );
@@ -194,6 +201,12 @@ int main() try
   state.camera.posZ = 0.f;
   state.camera.speedMul = 1.f;
 
+  state.spaceship_controls.moving = false;
+  state.spaceship_controls.reset = false;
+  state.spaceship_controls.x = 0.f;
+  state.spaceship_controls.y = 0.f;
+  state.spaceship_controls.rotZ = 0.f;
+
   // Animation state
   auto last = Clock::now();
 
@@ -292,8 +305,27 @@ int main() try
     }
 
     // Update: move spaceship
-    spaceship_clock += dt;
-    spaceship_mesh = move_spaceship(spaceship_mesh, spaceship_clock);
+    if (state.spaceship_controls.moving == true)
+    {
+      spaceship_clock += dt;
+      Vec3f transformVec = move_spaceship(&spaceship_mesh, spaceship_clock);
+      state.spaceship_controls.x += transformVec.x;
+      state.spaceship_controls.y += transformVec.y;
+      state.spaceship_controls.rotZ += transformVec.z;
+    }
+    if (state.spaceship_controls.reset == true)
+    {
+      spaceship_clock = 0.f;
+      transformMesh(spaceship_mesh, make_rotation_z(-state.spaceship_controls.rotZ) *
+                                    make_translation({-state.spaceship_controls.x,
+                                                      -state.spaceship_controls.y,
+                                                      0.f}));
+      state.spaceship_controls.x = 0.f;
+      state.spaceship_controls.y = 0.f;
+      state.spaceship_controls.rotZ = 0.f;
+
+      state.spaceship_controls.reset = false;
+    }
     GLuint spaceship_vao = create_vao(spaceship_mesh);
 
     // Update: compute matrices
@@ -459,6 +491,23 @@ namespace
             state->camera.speedMul = 0.5f;
           else if( GLFW_RELEASE == aAction )
             state->camera.speedMul = 1.f;
+        }
+      }
+
+      // Check spaceship animation controls
+      if( GLFW_KEY_F == aKey )
+      {
+        if( GLFW_PRESS == aAction )
+        {
+          state->spaceship_controls.moving = true;
+        }
+      }
+      else if( GLFW_KEY_R == aKey )
+      {
+        if( GLFW_PRESS == aAction )
+        {
+          state->spaceship_controls.moving = false;
+          state->spaceship_controls.reset = true;
         }
       }
     }
