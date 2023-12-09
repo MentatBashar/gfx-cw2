@@ -165,11 +165,13 @@ int main() try
   const char* defaultFragmentShaderPath = "../assets/default.frag";
   const char* terrainObjPath = "../assets/parlahti.obj";
   const char* textureObjPath = "../assets/L4343A-4k.jpeg";
+  const char* launchpadObjPath = "../assets/landingpad.obj";
 #else
   const char* defaultVertexShaderPath = "assets/default.vert";
   const char* defaultFragmentShaderPath = "assets/default.frag";
   const char* terrainObjPath = "assets/parlahti.obj";
   const char* textureObjPath = "assets/L4343A-4k.jpeg";
+  const char* launchpadObjPath = "assets/landingpad.obj";
 #endif
 
   // Global GL state
@@ -223,14 +225,20 @@ int main() try
   GLuint terrain_vao = create_vao(terrain_mesh);
   std::size_t terrainVertexCount = terrain_mesh.positions.size();
 
+  // Load terrain texture
+  auto textureObjectId = load_texture_2d(textureObjPath);
+
   auto spaceship_mesh = make_spaceship();
   GLuint spaceship_vao = create_vao(spaceship_mesh);
   std::size_t spaceshipVertexCount = spaceship_mesh.positions.size();
 
-  // Load Map texture
-  auto textureObjectId = load_texture_2d(textureObjPath);
+  // Landingpad
+  auto landingpad_mesh = load_wavefront_obj(launchpadObjPath);
+  GLuint landingpad_vao = create_vao(landingpad_mesh);
+  std::size_t landingpadVertexCount = landingpad_mesh.positions.size();
 
-
+  Mat44f landingpadTransform1 = make_translation({ -5.0f, 0.0f, -5.0f }); // 第一个位置
+  Mat44f landingpadTransform2 = make_translation({ 5.0f, 0.0f, 5.0f });
 
   OGL_CHECKPOINT_ALWAYS();
 
@@ -387,15 +395,38 @@ int main() try
     glUniform3f(3, 0.9f, 0.9f, 0.9f);
     glUniform3f(4, 0.05f, 0.05f, 0.05f);
 
-    // Program Crashes here
+
+    // Tell shader that we are using texture
+    glUniform1i(glGetUniformLocation(prog.programId(), "uUseTexture"), GL_TRUE);
+    
+    // Bind texture to terrain
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, textureObjectId);
     glBindVertexArray(terrain_vao);
     glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
     glDrawArrays(GL_TRIANGLES, 0, terrainVertexCount);
+    // We don't need terrain's texture after
+    glBindTexture(GL_TEXTURE_2D, 0);
 
-
-    glBindVertexArray(spaceship_vao);
+    // We are not using texture from here
+    glUniform1i(glGetUniformLocation(prog.programId(), "uUseTexture"), GL_FALSE);
+   
+    glBindVertexArray(spaceship_vao); 
     glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
     glDrawArrays(GL_TRIANGLES, 0, spaceshipVertexCount);
+    
+    Mat44f model1 = landingpadTransform1; 
+    Mat44f projCameraWorld1 = projection * world2camera * model1;
+    glUniformMatrix4fv(0, 1, GL_TRUE, projCameraWorld1.v);
+    glBindVertexArray(landingpad_vao);
+    glDrawArrays(GL_TRIANGLES, 0, landingpadVertexCount);
+
+    // 渲染第二个 launchpad
+    Mat44f model2 = landingpadTransform2;
+    Mat44f projCameraWorld2 = projection * world2camera * model2;
+    glUniformMatrix4fv(0, 1, GL_TRUE, projCameraWorld2.v);
+    glBindVertexArray(landingpad_vao);
+    glDrawArrays(GL_TRIANGLES, 0, landingpadVertexCount);
 
     // Texturing
     
