@@ -9,7 +9,7 @@ X Add first-person camera controls
 X Add simplfied directional light model
 X Add terrain texture
 
-* Load the launchpads and colour them properly
+X Load the launchpads and colour them properly  (Flaw found: when placing and moving camera around, the x-axis are completely opposit, need to fix this)
 X Create the custom model of the spaceship
 
 ~ Do the animation
