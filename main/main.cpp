@@ -62,6 +62,8 @@ namespace
 
       float x, y, rotZ;
     }spaceship_controls;
+
+    double lastPrintTime = 0.0; // Last print time for cam pos
   };
 
   void glfw_callback_error_( int, char const* );
@@ -133,7 +135,8 @@ int main() try
 
   // Set up event handling
   // TODO: Additional event handling setup
-  State_ state{};
+  State_ state{
+  };
 
   glfwSetWindowUserPointer( window, &state );
 
@@ -237,7 +240,7 @@ int main() try
   GLuint landingpad_vao = create_vao(landingpad_mesh);
   std::size_t landingpadVertexCount = landingpad_mesh.positions.size();
 
-  Mat44f landingpadTransform1 = make_translation({ -5.0f, 0.0f, -5.0f }); // 第一个位置
+  Mat44f landingpadTransform1 = make_translation({ -5.0f, 0.0f, -5.0f });
   Mat44f landingpadTransform2 = make_translation({ 5.0f, 0.0f, 5.0f });
 
   OGL_CHECKPOINT_ALWAYS();
@@ -286,8 +289,8 @@ int main() try
       if (yaw > 2.f * kPi_)
         yaw = -2.f * kPi_ + (2.f*kPi_ - yaw);
 
-      state.camera.posX += cos(yaw) * state.camera.speedMul;
-      state.camera.posZ -= sin(yaw) * state.camera.speedMul;
+      state.camera.posX += cos(yaw) * state.camera.speedMul * 0.2f;
+      state.camera.posZ -= sin(yaw) * state.camera.speedMul * 0.2f;
     }
     else if(state.camera.actionBackward)
     {
@@ -296,28 +299,28 @@ int main() try
       if (yaw > 2.f * kPi_)
         yaw = -2.f * kPi_ + (2.f*kPi_ - yaw);
 
-      state.camera.posX -= cos(yaw) * state.camera.speedMul;
-      state.camera.posZ += sin(yaw) * state.camera.speedMul;
+      state.camera.posX -= cos(yaw) * state.camera.speedMul * 0.2f;
+      state.camera.posZ += sin(yaw) * state.camera.speedMul * 0.2f;
     }
     else if(state.camera.actionLeft)
     {
       float yaw = state.camera.yaw;
-      state.camera.posX += cos(yaw) * state.camera.speedMul;
-      state.camera.posZ -= sin(yaw) * state.camera.speedMul;
+      state.camera.posX += cos(yaw) * state.camera.speedMul * 0.2f;
+      state.camera.posZ -= sin(yaw) * state.camera.speedMul * 0.2f;
     }
     else if(state.camera.actionRight)
     {
       float yaw = state.camera.yaw;
-      state.camera.posX -= cos(yaw) * state.camera.speedMul;
-      state.camera.posZ += sin(yaw) * state.camera.speedMul;
+      state.camera.posX -= cos(yaw) * state.camera.speedMul * 0.2f;
+      state.camera.posZ += sin(yaw) * state.camera.speedMul * 0.2f;
     }
     else if(state.camera.actionUp)
     {
-      state.camera.posY += 0.2f * state.camera.speedMul;
+      state.camera.posY += 0.2f * state.camera.speedMul * 0.2f;
     }
     else if(state.camera.actionDown)
     {
-      state.camera.posY -= 0.2f * state.camera.speedMul;
+      state.camera.posY -= 0.2f * state.camera.speedMul * 0.2f;
     }
 
     // Update: move spaceship
@@ -421,14 +424,20 @@ int main() try
     glBindVertexArray(landingpad_vao);
     glDrawArrays(GL_TRIANGLES, 0, landingpadVertexCount);
 
-    // 渲染第二个 launchpad
     Mat44f model2 = landingpadTransform2;
     Mat44f projCameraWorld2 = projection * world2camera * model2;
     glUniformMatrix4fv(0, 1, GL_TRUE, projCameraWorld2.v);
     glBindVertexArray(landingpad_vao);
     glDrawArrays(GL_TRIANGLES, 0, landingpadVertexCount);
 
-    // Texturing
+    double currentTime = glfwGetTime();
+
+    // Print cam position help to place landing pad
+    if (currentTime - state.lastPrintTime >= 1.0) {
+        std::printf("Camera Position: X = %.2f, Y = %.2f, Z = %.2f\n",
+            state.camera.posX, state.camera.posY, state.camera.posZ);
+        state.lastPrintTime = currentTime;
+    }
     
 
 
