@@ -7,7 +7,7 @@ X Reimplement simple_mesh so that we aren't accused of stealing it
 X Reimplement all the camera controls so that we aren't accused of stealing them
 X Add first-person camera controls
 X Add simplfied directional light model
-* Add terrain texture
+X Add terrain texture
 
 * Load the launchpads and colour them properly
 X Create the custom model of the spaceship
