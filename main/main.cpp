@@ -240,8 +240,8 @@ int main() try
   GLuint landingpad_vao = create_vao(landingpad_mesh);
   std::size_t landingpadVertexCount = landingpad_mesh.positions.size();
 
-  Mat44f landingpadTransform1 = make_translation({ -5.0f, 0.0f, -5.0f });
-  Mat44f landingpadTransform2 = make_translation({ 5.0f, 0.0f, 5.0f });
+  Mat44f landingpadTransform1 = make_translation({ -43.0f, -0.97f, 8.f });
+  Mat44f landingpadTransform2 = make_translation({ 25.0f, -0.97f, -6.f });
 
   OGL_CHECKPOINT_ALWAYS();
 
