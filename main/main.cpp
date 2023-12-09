@@ -21,6 +21,7 @@
 #include "loadobj.hpp"
 #include "mesh.hpp"
 #include "spaceship.hpp"
+#include "texture.hpp"
 
 
 namespace
@@ -163,10 +164,12 @@ int main() try
   const char* defaultVertexShaderPath = "../assets/default.vert";
   const char* defaultFragmentShaderPath = "../assets/default.frag";
   const char* terrainObjPath = "../assets/parlahti.obj";
+  const char* textureObjPath = "../assets/L4343A-4k.jpeg";
 #else
   const char* defaultVertexShaderPath = "assets/default.vert";
   const char* defaultFragmentShaderPath = "assets/default.frag";
   const char* terrainObjPath = "assets/parlahti.obj";
+  const char* textureObjPath = "assets/L4343A-4k.jpeg";
 #endif
 
   // Global GL state
@@ -223,6 +226,11 @@ int main() try
   auto spaceship_mesh = make_spaceship();
   GLuint spaceship_vao = create_vao(spaceship_mesh);
   std::size_t spaceshipVertexCount = spaceship_mesh.positions.size();
+
+  // Load Map texture
+  auto textureObjectId = load_texture_2d(textureObjPath);
+
+
 
   OGL_CHECKPOINT_ALWAYS();
 
@@ -371,19 +379,27 @@ int main() try
       1,
       1, GL_TRUE, normalMatrix.v
     );
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, textureObjectId);
 
     Vec3f lightDir = normalize(Vec3f{0.f, 1.f, -1.f});
     glUniform3fv(2, 1, &lightDir.x);
     glUniform3f(3, 0.9f, 0.9f, 0.9f);
     glUniform3f(4, 0.05f, 0.05f, 0.05f);
 
+    // Program Crashes here
     glBindVertexArray(terrain_vao);
     glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
     glDrawArrays(GL_TRIANGLES, 0, terrainVertexCount);
 
+
     glBindVertexArray(spaceship_vao);
     glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
     glDrawArrays(GL_TRIANGLES, 0, spaceshipVertexCount);
+
+    // Texturing
+    
+
 
     OGL_CHECKPOINT_DEBUG();
 

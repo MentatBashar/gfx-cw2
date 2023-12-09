@@ -99,12 +99,14 @@
     <ClInclude Include="loadobj.hpp" />
     <ClInclude Include="mesh.hpp" />
     <ClInclude Include="spaceship.hpp" />
+    <ClInclude Include="texture.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="loadobj.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="mesh.cpp" />
     <ClCompile Include="spaceship.cpp" />
+    <ClCompile Include="texture.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\vmlib\vmlib.vcxproj">
