@@ -8,4 +8,14 @@ Charlie set up a program that could load the .obj file.
 Charlie set up a perspetive projection for rendering.
 Charlie Set up the simplified directional light model.
 Charlie set up the first-person camera controls.
+
+Task 1.3
+Haoxuan implemented the texturing
+
+Task 1.4
+Haoxuan implemented the code to load the object model textures
+Haxouan created the two different spots for the launchpad
+
+Task 1.5
 Charlie created the spaceship model
+
