@@ -207,7 +207,7 @@ int main() try
   state.camera.posX = 0.f;
   state.camera.posY = 5.f;
   state.camera.posZ = 0.f;
-  state.camera.speedMul = 1.f;
+  state.camera.speedMul = 0.2f;
 
   state.spaceship_controls.moving = false;
   state.spaceship_controls.reset = false;
@@ -289,8 +289,8 @@ int main() try
       if (yaw > 2.f * kPi_)
         yaw = -2.f * kPi_ + (2.f*kPi_ - yaw);
 
-      state.camera.posX += cos(yaw) * state.camera.speedMul * 0.2f;
-      state.camera.posZ -= sin(yaw) * state.camera.speedMul * 0.2f;
+      state.camera.posX += cos(yaw) * state.camera.speedMul;
+      state.camera.posZ -= sin(yaw) * state.camera.speedMul;
     }
     else if(state.camera.actionBackward)
     {
@@ -299,28 +299,28 @@ int main() try
       if (yaw > 2.f * kPi_)
         yaw = -2.f * kPi_ + (2.f*kPi_ - yaw);
 
-      state.camera.posX -= cos(yaw) * state.camera.speedMul * 0.2f;
-      state.camera.posZ += sin(yaw) * state.camera.speedMul * 0.2f;
+      state.camera.posX -= cos(yaw) * state.camera.speedMul;
+      state.camera.posZ += sin(yaw) * state.camera.speedMul;
     }
     else if(state.camera.actionLeft)
     {
       float yaw = state.camera.yaw;
-      state.camera.posX += cos(yaw) * state.camera.speedMul * 0.2f;
-      state.camera.posZ -= sin(yaw) * state.camera.speedMul * 0.2f;
+      state.camera.posX += cos(yaw) * state.camera.speedMul;
+      state.camera.posZ -= sin(yaw) * state.camera.speedMul;
     }
     else if(state.camera.actionRight)
     {
       float yaw = state.camera.yaw;
-      state.camera.posX -= cos(yaw) * state.camera.speedMul * 0.2f;
-      state.camera.posZ += sin(yaw) * state.camera.speedMul * 0.2f;
+      state.camera.posX -= cos(yaw) * state.camera.speedMul;
+      state.camera.posZ += sin(yaw) * state.camera.speedMul;
     }
     else if(state.camera.actionUp)
     {
-      state.camera.posY += 0.2f * state.camera.speedMul * 0.2f;
+      state.camera.posY += 0.2f * state.camera.speedMul;
     }
     else if(state.camera.actionDown)
     {
-      state.camera.posY -= 0.2f * state.camera.speedMul * 0.2f;
+      state.camera.posY -= 0.2f * state.camera.speedMul;
     }
 
     // Update: move spaceship
@@ -393,31 +393,66 @@ int main() try
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, textureObjectId);
 
+    // World Light
     Vec3f lightDir = normalize(Vec3f{0.f, 1.f, -1.f});
+    // LightDir
     glUniform3fv(2, 1, &lightDir.x);
+    // LightDiffuse
     glUniform3f(3, 0.9f, 0.9f, 0.9f);
+    // SceneAmbient
     glUniform3f(4, 0.05f, 0.05f, 0.05f);
+    
+
+  
 
 
+    // ------------------------------- TERRAIN -------------------------------
+   
     // Tell shader that we are using texture
     glUniform1i(glGetUniformLocation(prog.programId(), "uUseTexture"), GL_TRUE);
-    
     // Bind texture to terrain
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, textureObjectId);
+
+    // Light for terrain
+    Vec3f terrainSpecularColor = { 1.f, 0.f, 0.f }; 
+    glUniform3fv(6, 1, &terrainSpecularColor.x);
+    float terrainShininess = 16.0f;
+    glUniform1f(7, terrainShininess);
+
     glBindVertexArray(terrain_vao);
     glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
     glDrawArrays(GL_TRIANGLES, 0, terrainVertexCount);
+
     // We don't need terrain's texture after
     glBindTexture(GL_TEXTURE_2D, 0);
-
     // We are not using texture from here
     glUniform1i(glGetUniformLocation(prog.programId(), "uUseTexture"), GL_FALSE);
    
+
+    // ------------------------------- SPACE SHIP -------------------------------
+    
+    // Light for space ship
+    Vec3f spaceshipSpecularColor = { 0.f, 1.f, 0.f };
+    glUniform3fv(6, 1, &spaceshipSpecularColor.x);
+    float spaceshipShininess = 32.0f; 
+    glUniform1f(7, spaceshipShininess);
+
+
+    //
+    glUniform3fv(9, 1, &lightDir.x);
     glBindVertexArray(spaceship_vao); 
     glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
     glDrawArrays(GL_TRIANGLES, 0, spaceshipVertexCount);
+
+    // ------------------------------- LANDING PAD -------------------------------
     
+    // Light for landing pad
+    Vec3f landingpadSpecularColor = { 0.f, 0.f, 1.f };
+    glUniform3fv(6, 1, &landingpadSpecularColor.x);
+    float landingpadShininess = 32.0f;
+    glUniform1f(7, landingpadShininess);
+
     Mat44f model1 = landingpadTransform1; 
     Mat44f projCameraWorld1 = projection * world2camera * model1;
     glUniformMatrix4fv(0, 1, GL_TRUE, projCameraWorld1.v);
@@ -429,6 +464,8 @@ int main() try
     glUniformMatrix4fv(0, 1, GL_TRUE, projCameraWorld2.v);
     glBindVertexArray(landingpad_vao);
     glDrawArrays(GL_TRIANGLES, 0, landingpadVertexCount);
+
+
 
     double currentTime = glfwGetTime();
 

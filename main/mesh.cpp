@@ -71,7 +71,8 @@ GLuint create_vao(MeshData const& aMeshData) {
     // Texture coord VBO
     // SpaceShip don't have any texture, so we need to add this if. 
     // If not, program will try to read a nullptr
-    if (!aMeshData.texcoords.empty()) {
+    if (!aMeshData.texcoords.empty()) 
+    {
         glGenBuffers(1, &texcoordVBO);
         glBindBuffer(GL_ARRAY_BUFFER, texcoordVBO);
         glBufferData(GL_ARRAY_BUFFER, aMeshData.texcoords.size() * sizeof(Vec2f), aMeshData.texcoords.data(), GL_STATIC_DRAW);
@@ -87,7 +88,8 @@ GLuint create_vao(MeshData const& aMeshData) {
     glDeleteBuffers(1, &positionVBO);
     glDeleteBuffers(1, &colorVBO);
     glDeleteBuffers(1, &normalVBO);
-    if (!aMeshData.texcoords.empty()) {
+    if (!aMeshData.texcoords.empty()) 
+    {
         glDeleteBuffers(1, &texcoordVBO);
     }
 
