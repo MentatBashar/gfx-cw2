@@ -183,7 +183,7 @@ int main() try
   glEnable(GL_FRAMEBUFFER_SRGB);
   glEnable(GL_CULL_FACE);
   glEnable(GL_DEPTH_TEST);
-  glClearColor(0.5f, 0.85f, 9.f, 0.0f);
+  glClearColor(0.2f, 0.2f, .2f, 0.0f);
 
   OGL_CHECKPOINT_ALWAYS();
 
@@ -418,7 +418,6 @@ int main() try
    
 
     // ------------------------------- SPACE SHIP -------------------------------
-    
 
     // Pass space ship model position to shader
     Mat44f spaceshipModelMatrix = make_translation({state.spaceship_controls.pos.x,
@@ -443,7 +442,6 @@ int main() try
     glBindVertexArray(spaceship_vao);
     glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
     glDrawArrays(GL_TRIANGLES, 0, spaceshipVertexCount);
-
   
 
     // ------------------------------- LANDING PAD -------------------------------
