@@ -184,7 +184,7 @@ int main() try
   glEnable(GL_FRAMEBUFFER_SRGB);
   glEnable(GL_CULL_FACE);
   glEnable(GL_DEPTH_TEST);
-  glClearColor(0.5f, 0.85f, 9.f, 0.0f);
+  glClearColor(0.2f, 0.2f, .2f, 0.0f);
 
   OGL_CHECKPOINT_ALWAYS();
 
@@ -397,7 +397,7 @@ int main() try
     // ------------------------------- TERRAIN -------------------------------
 
     // Tell shader that we are using texture
-    glUniform1i(glGetUniformLocation(prog.programId(), "uUseTexture"), GL_FALSE);
+    glUniform1i(glGetUniformLocation(prog.programId(), "uUseTexture"), GL_TRUE);
     // Bind texture to terrain
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, textureObjectId);
