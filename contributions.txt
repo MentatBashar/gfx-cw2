@@ -19,3 +19,7 @@ Haxouan created the two different spots for the launchpad
 Task 1.5
 Charlie created the spaceship model
 
+Task 1.6
+Haoxuan implemented full Blinn-Phong shading model
+Haoxuan implemented attenuation 
+Haoxuan implemented point light
