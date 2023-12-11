@@ -203,9 +203,11 @@ int main() try
       } );
 
   state.prog = &prog;
-  state.camera.posX = 0.f;
-  state.camera.posY = 5.f;
-  state.camera.posZ = 0.f;
+  state.camera.posX  = 25.f;
+  state.camera.posY  = 5.f;
+  state.camera.posZ  = -10.f;
+  state.camera.pitch = 0.f;
+  state.camera.yaw   = kPi_ / -2.f;
   state.camera.speedMul = 0.2f;
 
   state.spaceship_controls.moving = false;
@@ -390,8 +392,6 @@ int main() try
     glUniform3f(3, 0.9f, 0.9f, 0.9f);
     // SceneAmbient
     glUniform3f(4, 0.05f, 0.05f, 0.05f);
-    
-
   
 
 
@@ -406,11 +406,6 @@ int main() try
     // Light for terrain
     Mat44f terrainModelMatrix = kIdentity44f;
     glUniformMatrix4fv(13, 1, GL_TRUE, terrainModelMatrix.v);
-
-    Vec3f terrainSpecularColor = { 1.f, 0.f, 0.f }; 
-    glUniform3fv(6, 1, &terrainSpecularColor.x);
-    float terrainShininess = 64.0f;
-    glUniform1f(7, terrainShininess);
 
     glBindVertexArray(terrain_vao);
     glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
@@ -583,16 +578,16 @@ namespace
         else if( GLFW_KEY_LEFT_SHIFT == aKey )
         {
           if( GLFW_PRESS == aAction )
-            state->camera.speedMul= 2.f;
+            state->camera.speedMul = .4f;
           else if( GLFW_RELEASE == aAction )
-            state->camera.speedMul = 1.f;
+            state->camera.speedMul = .2f;
         }
         else if( GLFW_KEY_LEFT_CONTROL == aKey )
         {
           if( GLFW_PRESS == aAction )
-            state->camera.speedMul = 0.5f;
+            state->camera.speedMul = .1f;
           else if( GLFW_RELEASE == aAction )
-            state->camera.speedMul = 1.f;
+            state->camera.speedMul = .2f;
         }
       }
 
@@ -602,6 +597,7 @@ namespace
         if( GLFW_PRESS == aAction )
         {
           state->spaceship_controls.moving = true;
+          state->spaceship_controls.reset = false;
         }
       }
       else if( GLFW_KEY_R == aKey )
