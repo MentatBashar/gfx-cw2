@@ -289,7 +289,7 @@ int main() try
       if (yaw > 2.f * kPi_)
         yaw = -2.f * kPi_ + (2.f*kPi_ - yaw);
 
-      state.camera.posX += cos(yaw) * state.camera.speedMul;
+      state.camera.posX -= cos(yaw) * state.camera.speedMul;
       state.camera.posZ -= sin(yaw) * state.camera.speedMul;
     }
     else if(state.camera.actionBackward)
@@ -299,19 +299,19 @@ int main() try
       if (yaw > 2.f * kPi_)
         yaw = -2.f * kPi_ + (2.f*kPi_ - yaw);
 
-      state.camera.posX -= cos(yaw) * state.camera.speedMul;
+      state.camera.posX += cos(yaw) * state.camera.speedMul;
       state.camera.posZ += sin(yaw) * state.camera.speedMul;
     }
     else if(state.camera.actionLeft)
     {
       float yaw = state.camera.yaw;
-      state.camera.posX += cos(yaw) * state.camera.speedMul;
+      state.camera.posX -= cos(yaw) * state.camera.speedMul;
       state.camera.posZ -= sin(yaw) * state.camera.speedMul;
     }
     else if(state.camera.actionRight)
     {
       float yaw = state.camera.yaw;
-      state.camera.posX -= cos(yaw) * state.camera.speedMul;
+      state.camera.posX += cos(yaw) * state.camera.speedMul;
       state.camera.posZ += sin(yaw) * state.camera.speedMul;
     }
     else if(state.camera.actionUp)
@@ -354,7 +354,7 @@ int main() try
 
     Mat44f Rx = make_rotation_x(state.camera.pitch);
     Mat44f Ry = make_rotation_y(state.camera.yaw);
-    Mat44f T = make_translation({state.camera.posX,
+    Mat44f T = make_translation({-state.camera.posX,
                                  -state.camera.posY,
                                  -state.camera.posZ});
 
