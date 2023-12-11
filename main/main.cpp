@@ -407,17 +407,20 @@ int main() try
 
 
     // ------------------------------- TERRAIN -------------------------------
-   
+
     // Tell shader that we are using texture
-    glUniform1i(glGetUniformLocation(prog.programId(), "uUseTexture"), GL_FALSE);
+    glUniform1i(glGetUniformLocation(prog.programId(), "uUseTexture"), GL_TRUE);
     // Bind texture to terrain
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, textureObjectId);
 
     // Light for terrain
+    Mat44f terrainModelMatrix = kIdentity44f;
+    glUniformMatrix4fv(13, 1, GL_TRUE, terrainModelMatrix.v);
+
     Vec3f terrainSpecularColor = { 1.f, 0.f, 0.f }; 
     glUniform3fv(6, 1, &terrainSpecularColor.x);
-    float terrainShininess = 16.0f;
+    float terrainShininess = 64.0f;
     glUniform1f(7, terrainShininess);
 
     glBindVertexArray(terrain_vao);

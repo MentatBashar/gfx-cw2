@@ -22,8 +22,8 @@ layout(binding = 0) uniform sampler2D uTexture;
 void main()
 {
     vec3 normal = normalize(v2fNormal);
-    // vec3 viewDir = normalize(uCameraPos - v2fWorldPos);
-    vec3 viewDir = normalize(uCameraPos - gl_FragCoord.xyz);
+     vec3 viewDir = normalize(uCameraPos - v2fWorldPos);
+    //vec3 viewDir = normalize(uCameraPos - gl_FragCoord.xyz);
     vec3 baseColor = uUseTexture ? texture(uTexture, v2fTexCoord).rgb : v2fColor;
 
     // Handle Directional Lights "Sun"
