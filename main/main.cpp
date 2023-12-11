@@ -13,6 +13,7 @@
 #include "../support/checkpoint.hpp"
 #include "../support/debug_output.hpp"
 
+#include "../vmlib/vec3.hpp"
 #include "../vmlib/vec4.hpp"
 #include "../vmlib/mat44.hpp"
 #include "../vmlib/mat33.hpp"
@@ -49,7 +50,7 @@ namespace
 
       float speedMul;
 
-      float posX, posY, posZ;
+      Vec4f pos;
 
       float yaw, pitch;
 
@@ -203,9 +204,7 @@ int main() try
       } );
 
   state.prog = &prog;
-  state.camera.posX  = 25.f;
-  state.camera.posY  = 5.f;
-  state.camera.posZ  = -10.f;
+  state.camera.pos = {25.f, 5.f, -10.f, 1.f};
   state.camera.pitch = 0.f;
   state.camera.yaw   = kPi_ / -2.f;
   state.camera.speedMul = 0.2f;
@@ -282,14 +281,14 @@ int main() try
 
     // Update camera state
     if(state.camera.actionForward)
-    {
+    { 
       float yaw = state.camera.yaw;
       yaw += kPi_ / 2.f;
       if (yaw > 2.f * kPi_)
         yaw = -2.f * kPi_ + (2.f*kPi_ - yaw);
 
-      state.camera.posX -= cos(yaw) * state.camera.speedMul;
-      state.camera.posZ -= sin(yaw) * state.camera.speedMul;
+      state.camera.pos.x -= cos(yaw) * state.camera.speedMul;
+      state.camera.pos.z -= sin(yaw) * state.camera.speedMul;
     }
     else if(state.camera.actionBackward)
     {
@@ -298,28 +297,28 @@ int main() try
       if (yaw > 2.f * kPi_)
         yaw = -2.f * kPi_ + (2.f*kPi_ - yaw);
 
-      state.camera.posX += cos(yaw) * state.camera.speedMul;
-      state.camera.posZ += sin(yaw) * state.camera.speedMul;
+      state.camera.pos.x += cos(yaw) * state.camera.speedMul;
+      state.camera.pos.z += sin(yaw) * state.camera.speedMul;
     }
     else if(state.camera.actionLeft)
     {
       float yaw = state.camera.yaw;
-      state.camera.posX -= cos(yaw) * state.camera.speedMul;
-      state.camera.posZ -= sin(yaw) * state.camera.speedMul;
+      state.camera.pos.x -= cos(yaw) * state.camera.speedMul;
+      state.camera.pos.z -= sin(yaw) * state.camera.speedMul;
     }
     else if(state.camera.actionRight)
     {
       float yaw = state.camera.yaw;
-      state.camera.posX += cos(yaw) * state.camera.speedMul;
-      state.camera.posZ += sin(yaw) * state.camera.speedMul;
+      state.camera.pos.x += cos(yaw) * state.camera.speedMul;
+      state.camera.pos.z += sin(yaw) * state.camera.speedMul;
     }
     else if(state.camera.actionUp)
     {
-      state.camera.posY += 0.2f * state.camera.speedMul;
+      state.camera.pos.y += 0.2f * state.camera.speedMul;
     }
     else if(state.camera.actionDown)
     {
-      state.camera.posY -= 0.2f * state.camera.speedMul;
+      state.camera.pos.y -= 0.2f * state.camera.speedMul;
     }
 
     // Update: move spaceship
@@ -344,9 +343,9 @@ int main() try
 
     Mat44f Rx = make_rotation_x(state.camera.pitch);
     Mat44f Ry = make_rotation_y(state.camera.yaw);
-    Mat44f T = make_translation({-state.camera.posX,
-                                 -state.camera.posY,
-                                 -state.camera.posZ});
+    Mat44f T = make_translation({-state.camera.pos.x,
+                                 -state.camera.pos.y,
+                                 -state.camera.pos.z});
 
     // First person camera
     Mat44f world2camera = Rx * Ry * T;
@@ -433,9 +432,9 @@ int main() try
     glUniform1f(7, spaceshipShininess);
 
     // Point lights for spaceship
-    Vec3f pointLightPosition = { 1.0f, 2.0f, 3.0f };  
+    Vec3f pointLightPosition = { 25.f, -0.77f, -6.f };  
     Vec3f pointLightDiffuseColor = { 0.f, 1.f, 1.0f }; 
-    Vec3f pointLightSpecularColor = { 1.0f, 1.0f, 0.f }; 
+    Vec3f pointLightSpecularColor = { 1.0f, 1.0f, 1.f }; 
     glUniform3fv(9, 1, &pointLightPosition.x);
     glUniform3fv(11, 1, &pointLightDiffuseColor.x);
     glUniform3fv(12, 1, &pointLightSpecularColor.x);
@@ -473,7 +472,7 @@ int main() try
     // Print cam position help to place landing pad
     if (currentTime - state.lastPrintTime >= 1.0) {
         std::printf("Camera Position: X = %.2f, Y = %.2f, Z = %.2f\n",
-            state.camera.posX, state.camera.posY, state.camera.posZ);
+            state.camera.pos.x, state.camera.pos.y, state.camera.pos.z);
         std::printf("Spaceship Position: X = %.2f, Y = %.2f, Z = %.2f\n",
             state.spaceship_controls.pos.x,
             state.spaceship_controls.pos.y,
