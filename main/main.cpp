@@ -40,6 +40,8 @@ namespace
     struct Camera_
     {
       bool cameraActive;
+      int mode;
+
       bool
       actionForward,
       actionBackward,
@@ -50,7 +52,7 @@ namespace
 
       float speedMul;
 
-      Vec4f pos;
+      Vec3f pos;
 
       float yaw, pitch;
 
@@ -204,7 +206,8 @@ int main() try
       } );
 
   state.prog = &prog;
-  state.camera.pos = {25.f, 5.f, -10.f, 1.f};
+  state.camera.mode = 0;
+  state.camera.pos = {25.f, 5.f, -10.f};
   state.camera.pitch = 0.f;
   state.camera.yaw   = kPi_ / -2.f;
   state.camera.speedMul = 0.2f;
@@ -321,6 +324,12 @@ int main() try
       state.camera.pos.y -= 0.2f * state.camera.speedMul;
     }
 
+    // Arc-ball camera
+    if (state.camera.mode == 1)
+    {
+      state.camera.pos = state.spaceship_controls.pos;
+    }
+
     // Update: move spaceship
     if (state.spaceship_controls.moving == true)
     {
@@ -343,15 +352,27 @@ int main() try
 
     Mat44f Rx = make_rotation_x(state.camera.pitch);
     Mat44f Ry = make_rotation_y(state.camera.yaw);
-    Mat44f T = make_translation({-state.camera.pos.x,
-                                 -state.camera.pos.y,
-                                 -state.camera.pos.z});
 
-    // First person camera
-    Mat44f world2camera = Rx * Ry * T;
+    Mat44f T;
+    Mat44f world2camera;
 
     // Arc-ball camera
-    // Mat44f world2camera = T * Rx * Ry;
+    if (state.camera.mode == 1)
+    {
+      T = make_translation({0.f,
+                            0.f,
+                            -5.f});
+      world2camera = T * Rx * Ry;
+    }
+    // First person camera
+    else
+    {
+      T = make_translation({-state.camera.pos.x,
+                            -state.camera.pos.y,
+                            -state.camera.pos.z});
+      world2camera = Rx * Ry * T;
+    }
+    
 
     Mat44f projection = make_perspective_projection(
         60.f * kPi_ / 180.f,
@@ -529,8 +550,18 @@ namespace
           glfwSetInputMode( aWindow, GLFW_CURSOR, GLFW_CURSOR_NORMAL );
       }
 
+      if( GLFW_KEY_C == aKey )
+      {
+        if( GLFW_PRESS == aAction )
+        {
+          state->camera.mode++;
+          if (state->camera.mode >= 3)
+            state->camera.mode = 0;
+        }
+      }
+
       // Camera controls if camera is active
-      if( state->camera.cameraActive )
+      if(state->camera.cameraActive && state->camera.mode == 0)
       {
         if( GLFW_KEY_W == aKey )
         {
@@ -590,6 +621,31 @@ namespace
         }
       }
 
+      // Arc-ball Mode
+      if(state->camera.cameraActive && state->camera.mode == 1)
+      {
+        if( GLFW_KEY_W == aKey )
+        {
+          if( GLFW_PRESS == aAction )
+            state->camera.actionForward = true;
+          else if( GLFW_RELEASE == aAction )
+            state->camera.actionForward = false;
+        }
+        else if( GLFW_KEY_S == aKey )
+        {
+          if( GLFW_PRESS == aAction )
+            state->camera.actionBackward = true;
+          else if( GLFW_RELEASE == aAction )
+            state->camera.actionBackward = false;
+        }
+      }
+
+      // Fixed Mode
+      if(state->camera.mode == 2)
+      {
+        ;
+      }
+
       // Check spaceship animation controls
       if( GLFW_KEY_F == aKey )
       {
@@ -614,7 +670,7 @@ namespace
   {
     if( auto* state = static_cast<State_*>(glfwGetWindowUserPointer( aWindow )) )
     {
-      if(state->camera.cameraActive)
+      if(state->camera.cameraActive && state->camera.mode != 2)
       {
         auto const dx = float(aX-state->camera.lastX);
         auto const dy = float(aY-state->camera.lastY);
