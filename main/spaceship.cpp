@@ -4,46 +4,19 @@
 #include <iostream>
 
 
-MeshData move_spaceship(MeshData spaceship_mesh,
-                        float t,
-                        float* x,
-                        float* y,
-                        float* rotZ)
+MeshData move_spaceship(MeshData spaceship_mesh, float t)
 {
- /*
-  * Use three quadratic equations to model the movement of the ship in three
-  * planes.
-  *
-  * These equations are plotted with {x,y,x} in respect to t. Because of this,
-  * there is no reason to store the current position of the spaceship anywhere.
-  *
-  * For the sake of simplicity, x and z will have the same equation, and y will
-  * have one that has a slightly shallower slope.
-  */
+  float dy, drZ;
 
-  // Equations:
-  //
-  // dx = (t^2) / 8192
-  // dy = (t^2) / 4096
-  
-  float dx, dy, drZ;
+  // dy increases with a quadratic curve
+  dy = std::pow(t, 2) / 4096.f;
 
-  dx = std::pow(t, 2) / 8192;
-  dy = std::pow(t, 2) / 4096;
-
-  // Through the power of number fudging and powers of two, this spaceship will
-  // now always face the way that it moves. Probably. If you squint hard.
-  //drZ = t / 32768.f;
-  
-  drZ = tan(dy/dx) / 6144;
+  // A relatively slow rotation
+  drZ = 1.f / 4096.f;
 
   auto newMesh = transformMesh(spaceship_mesh,
-                               make_translation({dx, dy, 0.f}) *
+                               make_translation({0.f, dy, 0.f}) *
                                make_rotation_z(drZ));
-
-  *x += dx;
-  *y += dy;
-  *rotZ += drZ;
 
   return newMesh;
 }
@@ -143,7 +116,9 @@ MeshData make_spaceship()
   auto spaceship_mesh = mergeMeshes(meshList);
   
   spaceship_mesh = transformMesh(spaceship_mesh,
-                                 make_scaling(0.4f, 0.4f, 0.4f));
+                                 make_translation({25.f, -0.77f, -6.f}) *
+                                 make_scaling(0.2f, 0.2f, 0.2f)
+                                 );
 
   return spaceship_mesh;
 }

@@ -59,8 +59,6 @@ namespace
     struct SpaceshipControls_
     {
       bool moving, reset;
-
-      float x, y, rotZ;
     }spaceship_controls;
 
     double lastPrintTime = 0.0; // Last print time for cam pos
@@ -211,9 +209,6 @@ int main() try
 
   state.spaceship_controls.moving = false;
   state.spaceship_controls.reset = false;
-  state.spaceship_controls.x = 0.f;
-  state.spaceship_controls.y = 0.f;
-  state.spaceship_controls.rotZ = 0.f;
 
   // Animation state
   auto last = Clock::now();
@@ -327,23 +322,12 @@ int main() try
     if (state.spaceship_controls.moving == true)
     {
       spaceship_clock += dt;
-      spaceship_mesh = move_spaceship(spaceship_mesh,                                      
-                                      spaceship_clock,
-                                      &state.spaceship_controls.x,
-                                      &state.spaceship_controls.y,
-                                      &state.spaceship_controls.rotZ
-                                      );
+      spaceship_mesh = move_spaceship(spaceship_mesh, spaceship_clock);
     }
     if (state.spaceship_controls.reset == true)
     {
       spaceship_clock = 0.f;
-      spaceship_mesh = transformMesh(spaceship_mesh, make_rotation_z(state.spaceship_controls.rotZ) *
-                                     make_translation({-state.spaceship_controls.x,
-                                                       -state.spaceship_controls.y,
-                                                       0.f}));
-      state.spaceship_controls.x = 0.f;
-      state.spaceship_controls.y = 0.f;
-      state.spaceship_controls.rotZ = 0.f;
+      spaceship_mesh = make_spaceship();
 
       state.spaceship_controls.reset = false;
     }
@@ -438,8 +422,8 @@ int main() try
     
 
     // Pass space ship model position to shader
-    Mat44f spaceshipModelMatrix = make_translation({ state.spaceship_controls.x, state.spaceship_controls.y, 0.f });
-    glUniformMatrix4fv(13, 1, GL_TRUE, spaceshipModelMatrix.v);
+    //Mat44f spaceshipModelMatrix = make_translation({ state.spaceship_controls.x, state.spaceship_controls.y, 0.f });
+    //glUniformMatrix4fv(13, 1, GL_TRUE, spaceshipModelMatrix.v);
     
     // Directional light for space ship
     Vec3f spaceshipSpecularColor = { 1.f, 1.f, 1.f };
@@ -489,8 +473,6 @@ int main() try
     if (currentTime - state.lastPrintTime >= 1.0) {
         std::printf("Camera Position: X = %.2f, Y = %.2f, Z = %.2f\n",
             state.camera.posX, state.camera.posY, state.camera.posZ);
-        std::printf("Spaceship Position: X = %.2f, Y = %.2f, Z = %.2f\n",
-            state.spaceship_controls.x, state.spaceship_controls.y, state.spaceship_controls.rotZ);
         state.lastPrintTime = currentTime;
     }
     
