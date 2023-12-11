@@ -23,3 +23,17 @@ Task 1.6
 Haoxuan implemented full Blinn-Phong shading model
 Haoxuan implemented attenuation 
 Haoxuan implemented point light
+
+Task 1.7
+Charlie implemented the animation
+
+Task 1.8
+
+
+Task 1.10
+
+
+Task 1.11
+
+
+Task 1.12

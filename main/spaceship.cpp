@@ -9,7 +9,7 @@ MeshData move_spaceship(MeshData spaceship_mesh, float t)
   float dy, drZ;
 
   // dy increases with a quadratic curve
-  dy = std::pow(t, 2) / 4096.f;
+  dy = std::pow(t, 2) / 16384.f;
 
   // A relatively slow rotation
   drZ = 1.f / 4096.f;
@@ -23,73 +23,73 @@ MeshData move_spaceship(MeshData spaceship_mesh, float t)
 
 MeshData make_spaceship()
 {
-  auto tank1_body = make_cylinder(true, 128, {1.f, 0.2f, 0.2f},
+  auto tank1_body = make_cylinder(true, 128, {.2f, .2f, .2f},
                                  make_rotation_z(3.141592f / 2.f) *
                                  make_scaling(3.f, .5f, .5f) *
                                  make_translation({0.f, 2.f, 0.f}));
-  auto tank1_lower_cone = make_cone(true, 128, {.2f, 1.f, 0.2f},
+  auto tank1_lower_cone = make_cone(true, 128, {.7f, .2f, 1.f},
                                  make_rotation_z(-3.141592f / 2.f) *
                                  make_scaling(.3f, .5f, .5f) *
                                  make_translation({0.f, 2.f, 0.f}));
-  auto tank1_upper_cone = make_cone(true, 128, {.2f, 1.f, 0.2f},
+  auto tank1_upper_cone = make_cone(true, 128, {.7f, .2f, 1.f},
                                  make_rotation_z(3.141592f / 2.f) *
                                  make_scaling(.3f, .5f, .5f) *
                                  make_translation({10.f, 2.f, 0.f}));
 
-  auto tank2_body = make_cylinder(true, 128, {1.f, 0.2f, 0.2f},
+  auto tank2_body = make_cylinder(true, 128, {.2f, .2f, .2f},
                                  make_rotation_z(3.141592f / 2.f) *
                                  make_scaling(3.f, .5f, .5f) *
                                  make_translation({0.f, -2.f, 0.f}));
-  auto tank2_lower_cone = make_cone(true, 128, {.2f, 1.f, 0.2f},
+  auto tank2_lower_cone = make_cone(true, 128, {.7f, .2f, 1.f},
                                  make_rotation_z(-3.141592f / 2.f) *
                                  make_scaling(.3f, .5f, .5f) *
                                  make_translation({0.f, -2.f, 0.f}));
-  auto tank2_upper_cone = make_cone(true, 128, {.2f, 1.f, 0.2f},
+  auto tank2_upper_cone = make_cone(true, 128, {.7f, .2f, 1.f},
                                  make_rotation_z(3.141592f / 2.f) *
                                  make_scaling(.3f, .5f, .5f) *
                                  make_translation({10.f, -2.f, 0.f}));
 
-  auto tank3_body = make_cylinder(true, 128, {1.f, 0.2f, 0.2f},
+  auto tank3_body = make_cylinder(true, 128, {.2f, .2f, .2f},
                                  make_rotation_z(3.141592f / 2.f) *
                                  make_scaling(3.f, .5f, .5f) *
                                  make_translation({0.f, 0.f, 2.f}));
-  auto tank3_lower_cone = make_cone(true, 128, {.2f, 1.f, 0.2f},
+  auto tank3_lower_cone = make_cone(true, 128, {.7f, .2f, 1.f},
                                  make_rotation_z(-3.141592f / 2.f) *
                                  make_scaling(.3f, .5f, .5f) *
                                  make_translation({0.f, 0.f, 2.f}));
-  auto tank3_upper_cone = make_cone(true, 128, {.2f, 1.f, 0.2f},
+  auto tank3_upper_cone = make_cone(true, 128, {.7f, .2f, 1.f},
                                  make_rotation_z(3.141592f / 2.f) *
                                  make_scaling(.3f, .5f, .5f) *
                                  make_translation({10.f, 0.f, 2.f}));
 
-  auto tank4_body = make_cylinder(true, 128, {1.f, 0.2f, 0.2f},
+  auto tank4_body = make_cylinder(true, 128, {.2f, .2f, .2f},
                                  make_rotation_z(3.141592f / 2.f) *
                                  make_scaling(3.f, .5f, .5f) *
                                  make_translation({0.f, 0.f, -2.f}));
-  auto tank4_lower_cone = make_cone(true, 128, {.2f, 1.f, 0.2f},
+  auto tank4_lower_cone = make_cone(true, 128, {.7f, .2f, 1.f},
                                  make_rotation_z(-3.141592f / 2.f) *
                                  make_scaling(.3f, .5f, .5f) *
                                  make_translation({0.f, 0.f, -2.f}));
-  auto tank4_upper_cone = make_cone(true, 128, {.2f, 1.f, 0.2f},
+  auto tank4_upper_cone = make_cone(true, 128, {.7f, .2f, 1.f},
                                  make_rotation_z(3.141592f / 2.f) *
                                  make_scaling(.3f, .5f, .5f) *
                                  make_translation({10.f, 0.f, -2.f}));
   
 
-  auto body = make_cube({.2f, .2f, 1.f},
+  auto body = make_cube({.4f, .4f, .4f},
                         make_scaling(.5f, 2.25f, .5f) *
                         make_translation({0.f, .75f, 0.f})
                         );
-  auto engine = make_cone(true, 128, {.2f, 1.f, .2f},
+  auto engine = make_cone(true, 128, {.05f, .05f, .05f},
                           make_rotation_z(3.141592f / 2.f) *
                           make_scaling(.75f, .75f, .75f) *
                           make_translation({-1.25f, 0.f, 0.f}));
 
-  auto capsule_lower_cone= make_cone(true, 128, {.2f, 1.f, .2f},
+  auto capsule_lower_cone= make_cone(true, 128, {.6f, .2f, 1.f},
                                      make_rotation_z(-3.141592f / 2.f) *
                                      make_scaling(1.2f, .5f, .5f) *
                                      make_translation({-4.f, 0.f, 0.f}));
-  auto capsule_upper_cone= make_cone(true, 128, {.2f, 1.f, .2f},
+  auto capsule_upper_cone= make_cone(true, 128, {.6f, .2f, 1.f},
                                      make_rotation_z(3.141592f / 2.f) *
                                      make_scaling(1.2f, .5f, .5f) *
                                      make_translation({4.f, 0.f, 0.f}));
