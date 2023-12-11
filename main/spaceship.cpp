@@ -85,7 +85,7 @@ MeshData make_spaceship()
                                  make_translation({10.f, 0.f, -2.f}));
   
 
-  auto body = make_cube({.1f, .1f, .1f},
+  auto body = make_cube({1.f, .4f, .4f},
                         make_scaling(.5f, 2.25f, .5f) *
                         make_translation({0.f, .75f, 0.f})
                         );
