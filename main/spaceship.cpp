@@ -33,11 +33,13 @@ MeshData move_spaceship(MeshData spaceship_mesh,
 
   // Through the power of number fudging and powers of two, this spaceship will
   // now always face the way that it moves. Probably. If you squint hard.
-  drZ = t / 32768.f;
+  //drZ = t / 32768.f;
+  
+  drZ = tan(dy/dx) / 6144;
 
   auto newMesh = transformMesh(spaceship_mesh,
-                               make_rotation_z(-drZ) * 
-                               make_translation({dx, dy, 0.f}));
+                               make_translation({dx, dy, 0.f}) *
+                               make_rotation_z(drZ));
 
   *x += dx;
   *y += dy;
