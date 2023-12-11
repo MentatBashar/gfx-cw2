@@ -20,6 +20,8 @@ X Create the custom model of the spaceship
 
 [Stretch]
 * Add local light sources
+  X Point Lights
+  * Bind three point lights to spaceship
 * Add particles
 * Add split screen
 
