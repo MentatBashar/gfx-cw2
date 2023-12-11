@@ -24,7 +24,6 @@
 #include "spaceship.hpp"
 #include "texture.hpp"
 
-
 namespace
 {
   constexpr char const* kWindowTitle = "COMP3811 - CW2";
@@ -392,7 +391,9 @@ int main() try
     // SceneAmbient
     glUniform3f(4, 0.05f, 0.05f, 0.05f);
   
+    // ------------------------------- 2D GUI --------------------------------
 
+    
 
     // ------------------------------- TERRAIN -------------------------------
 
