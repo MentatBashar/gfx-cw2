@@ -59,6 +59,7 @@ namespace
     struct SpaceshipControls_
     {
       bool moving, reset;
+      Vec3f pos;
     }spaceship_controls;
 
     double lastPrintTime = 0.0; // Last print time for cam pos
@@ -209,6 +210,7 @@ int main() try
 
   state.spaceship_controls.moving = false;
   state.spaceship_controls.reset = false;
+  state.spaceship_controls.pos = {25.f, -0.77f, -6.f};
 
   // Animation state
   auto last = Clock::now();
@@ -322,7 +324,9 @@ int main() try
     if (state.spaceship_controls.moving == true)
     {
       spaceship_clock += dt;
-      spaceship_mesh = move_spaceship(spaceship_mesh, spaceship_clock);
+      spaceship_mesh = move_spaceship(spaceship_mesh,
+                                      spaceship_clock,
+                                      &state.spaceship_controls.pos);
     }
     if (state.spaceship_controls.reset == true)
     {
@@ -422,8 +426,10 @@ int main() try
     
 
     // Pass space ship model position to shader
-    //Mat44f spaceshipModelMatrix = make_translation({ state.spaceship_controls.x, state.spaceship_controls.y, 0.f });
-    //glUniformMatrix4fv(13, 1, GL_TRUE, spaceshipModelMatrix.v);
+    Mat44f spaceshipModelMatrix = make_translation({state.spaceship_controls.pos.x,
+                                                    state.spaceship_controls.pos.y,
+                                                    state.spaceship_controls.pos.z});
+    glUniformMatrix4fv(13, 1, GL_TRUE, spaceshipModelMatrix.v);
     
     // Directional light for space ship
     Vec3f spaceshipSpecularColor = { 1.f, 1.f, 1.f };
@@ -473,6 +479,10 @@ int main() try
     if (currentTime - state.lastPrintTime >= 1.0) {
         std::printf("Camera Position: X = %.2f, Y = %.2f, Z = %.2f\n",
             state.camera.posX, state.camera.posY, state.camera.posZ);
+        std::printf("Spaceship Position: X = %.2f, Y = %.2f, Z = %.2f\n",
+            state.spaceship_controls.pos.x,
+            state.spaceship_controls.pos.y,
+            state.spaceship_controls.pos.z);
         state.lastPrintTime = currentTime;
     }
     

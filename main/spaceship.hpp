@@ -11,7 +11,7 @@
 #include "../vmlib/mat33.hpp"
 #include "../vmlib/mat44.hpp"
 
-MeshData move_spaceship(MeshData spaceship_mesh, float t);
+MeshData move_spaceship(MeshData spaceship_mesh, float t, Vec3f* pos);
 
 MeshData make_spaceship();
 

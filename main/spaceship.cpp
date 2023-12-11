@@ -4,9 +4,9 @@
 #include <iostream>
 
 
-MeshData move_spaceship(MeshData spaceship_mesh, float t)
+MeshData move_spaceship(MeshData spaceship_mesh, float t, Vec3f* pos)
 {
-  float dy, drZ;
+  float newX, dy, drZ;
 
   // dy increases with a quadratic curve
   dy = std::pow(t, 2) / 16384.f;
@@ -14,16 +14,25 @@ MeshData move_spaceship(MeshData spaceship_mesh, float t)
   // A relatively slow rotation
   drZ = 1.f / 4096.f;
 
+  // Bit of a hack, but because the capsule cones are added last, and the third
+  // last point added to a cone is its top vertex, this should give a pretty
+  // accurate x-position of the spaceship for the tracking cameras(unless of
+  // course its on its side).
+  newX = spaceship_mesh.positions[spaceship_mesh.positions.size()-3].x;
+
   auto newMesh = transformMesh(spaceship_mesh,
-                               make_translation({0.f, dy, 0.f}) *
-                               make_rotation_z(drZ));
+                               make_rotation_z(drZ) *
+                               make_translation({0.f, dy, 0.f}));
+
+  pos->x = newX;
+  pos->y += dy;
 
   return newMesh;
 }
 
 MeshData make_spaceship()
 {
-  auto tank1_body = make_cylinder(true, 128, {.2f, .2f, .2f},
+  auto tank1_body = make_cylinder(true, 128, {.2f, .3f, .8f},
                                  make_rotation_z(3.141592f / 2.f) *
                                  make_scaling(3.f, .5f, .5f) *
                                  make_translation({0.f, 2.f, 0.f}));
@@ -36,7 +45,7 @@ MeshData make_spaceship()
                                  make_scaling(.3f, .5f, .5f) *
                                  make_translation({10.f, 2.f, 0.f}));
 
-  auto tank2_body = make_cylinder(true, 128, {.2f, .2f, .2f},
+  auto tank2_body = make_cylinder(true, 128, {.2f, .3f, .8f},
                                  make_rotation_z(3.141592f / 2.f) *
                                  make_scaling(3.f, .5f, .5f) *
                                  make_translation({0.f, -2.f, 0.f}));
@@ -49,7 +58,7 @@ MeshData make_spaceship()
                                  make_scaling(.3f, .5f, .5f) *
                                  make_translation({10.f, -2.f, 0.f}));
 
-  auto tank3_body = make_cylinder(true, 128, {.2f, .2f, .2f},
+  auto tank3_body = make_cylinder(true, 128, {.2f, .3f, .8f},
                                  make_rotation_z(3.141592f / 2.f) *
                                  make_scaling(3.f, .5f, .5f) *
                                  make_translation({0.f, 0.f, 2.f}));
@@ -62,7 +71,7 @@ MeshData make_spaceship()
                                  make_scaling(.3f, .5f, .5f) *
                                  make_translation({10.f, 0.f, 2.f}));
 
-  auto tank4_body = make_cylinder(true, 128, {.2f, .2f, .2f},
+  auto tank4_body = make_cylinder(true, 128, {.2f, .3f, .8f},
                                  make_rotation_z(3.141592f / 2.f) *
                                  make_scaling(3.f, .5f, .5f) *
                                  make_translation({0.f, 0.f, -2.f}));
@@ -76,11 +85,11 @@ MeshData make_spaceship()
                                  make_translation({10.f, 0.f, -2.f}));
   
 
-  auto body = make_cube({.4f, .4f, .4f},
+  auto body = make_cube({.1f, .1f, .1f},
                         make_scaling(.5f, 2.25f, .5f) *
                         make_translation({0.f, .75f, 0.f})
                         );
-  auto engine = make_cone(true, 128, {.05f, .05f, .05f},
+  auto engine = make_cone(true, 128, {.4f, .4f, .4f},
                           make_rotation_z(3.141592f / 2.f) *
                           make_scaling(.75f, .75f, .75f) *
                           make_translation({-1.25f, 0.f, 0.f}));
