@@ -4,7 +4,11 @@
 #include <iostream>
 
 
-Vec3f move_spaceship(MeshData* spaceship_mesh, float t)
+MeshData move_spaceship(MeshData spaceship_mesh,
+                        float t,
+                        float* x,
+                        float* y,
+                        float* rotZ)
 {
  /*
   * Use three quadratic equations to model the movement of the ship in three
@@ -19,23 +23,27 @@ Vec3f move_spaceship(MeshData* spaceship_mesh, float t)
 
   // Equations:
   //
-  // x = (t^2) / 8192
-  // y = (t^2) / 4096
+  // dx = (t^2) / 8192
+  // dy = (t^2) / 4096
   
-  float dx, dy, rotZ;
+  float dx, dy, drZ;
 
-  dx = std::pow(t, 2);
-  dy = std::pow(t, 2);
+  dx = std::pow(t, 2) / 8192;
+  dy = std::pow(t, 2) / 4096;
 
   // Through the power of number fudging and powers of two, this spaceship will
   // now always face the way that it moves. Probably. If you squint hard.
-  rotZ = t / 32768.f;
+  drZ = t / 32768.f;
 
-  transformMesh(*spaceship_mesh,
-                make_rotation_z(-rotZ) * 
-                make_translation({dx, dy, 0.f}));
+  auto newMesh = transformMesh(spaceship_mesh,
+                               make_rotation_z(-drZ) * 
+                               make_translation({dx, dy, 0.f}));
 
-  return Vec3f{dx, dy, rotZ};
+  *x += dx;
+  *y += dy;
+  *rotZ += drZ;
+
+  return newMesh;
 }
 
 MeshData make_spaceship()

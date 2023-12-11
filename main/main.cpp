@@ -327,18 +327,20 @@ int main() try
     if (state.spaceship_controls.moving == true)
     {
       spaceship_clock += dt;
-      Vec3f transformVec = move_spaceship(&spaceship_mesh, spaceship_clock);
-      state.spaceship_controls.x += transformVec.x;
-      state.spaceship_controls.y += transformVec.y;
-      state.spaceship_controls.rotZ += transformVec.z;
+      spaceship_mesh = move_spaceship(spaceship_mesh,                                      
+                                      spaceship_clock,
+                                      &state.spaceship_controls.x,
+                                      &state.spaceship_controls.y,
+                                      &state.spaceship_controls.rotZ
+                                      );
     }
     if (state.spaceship_controls.reset == true)
     {
       spaceship_clock = 0.f;
-      transformMesh(spaceship_mesh, make_rotation_z(-state.spaceship_controls.rotZ) *
-                                    make_translation({-state.spaceship_controls.x,
-                                                      -state.spaceship_controls.y,
-                                                      0.f}));
+      spaceship_mesh = transformMesh(spaceship_mesh, make_rotation_z(state.spaceship_controls.rotZ) *
+                                     make_translation({-state.spaceship_controls.x,
+                                                       -state.spaceship_controls.y,
+                                                       0.f}));
       state.spaceship_controls.x = 0.f;
       state.spaceship_controls.y = 0.f;
       state.spaceship_controls.rotZ = 0.f;
@@ -348,7 +350,6 @@ int main() try
     GLuint spaceship_vao = create_vao(spaceship_mesh);
 
     // Update: compute matrices
-    //TODO: define and compute projCameraWorld matrix
     Mat44f model2world = make_rotation_y(angle);
 
     Mat44f Rx = make_rotation_x(state.camera.pitch);
@@ -376,7 +377,7 @@ int main() try
     // Draw scene
     OGL_CHECKPOINT_DEBUG();
 
-    //TODO: draw frame
+    //Draw frame
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     glUseProgram(prog.programId());
@@ -488,10 +489,11 @@ int main() try
     if (currentTime - state.lastPrintTime >= 1.0) {
         std::printf("Camera Position: X = %.2f, Y = %.2f, Z = %.2f\n",
             state.camera.posX, state.camera.posY, state.camera.posZ);
+        std::printf("Spaceship Position: X = %.2f, Y = %.2f, Z = %.2f\n",
+            state.spaceship_controls.x, state.spaceship_controls.y, state.spaceship_controls.rotZ);
         state.lastPrintTime = currentTime;
     }
     
-
 
     OGL_CHECKPOINT_DEBUG();
 
