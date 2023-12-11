@@ -27,12 +27,13 @@ void main()
     vec3 baseColor = uUseTexture ? texture(uTexture, v2fTexCoord).rgb : v2fColor;
 
     // Handle Directional Lights "Sun"
+    // Don't need spec lights for directional light
     vec3 dirLightDir = normalize(uLightDir);
     float diffDir = max(dot(normal, dirLightDir), 0.0);
     vec3 reflectDirDir = reflect(-dirLightDir, normal);
-    float specDir = pow(max(dot(viewDir, reflectDirDir), 0.0), uShininess);
+    // float specDir = pow(max(dot(viewDir, reflectDirDir), 0.0), uShininess);
     vec3 dirDiffuse = diffDir * uLightDiffuse;
-    vec3 dirSpecular = specDir * uLightSpecular;
+    // vec3 dirSpecular = specDir * uLightSpecular;
 
     // Handle Directional Point Lights
     vec3 pointLightDir = normalize(uLightPos - v2fWorldPos);
@@ -50,6 +51,6 @@ void main()
 
     // Final Color
     vec3 finalDiffuse = dirDiffuse + pointDiffuse;
-    vec3 finalSpecular = dirSpecular + pointSpecular;
+    vec3 finalSpecular = /*dirSpecular +*/ pointSpecular;
     oColor = (uSceneAmbient + finalDiffuse + finalSpecular) * baseColor;
 }
