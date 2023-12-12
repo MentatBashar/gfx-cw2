@@ -3,7 +3,7 @@ Each block should be done before the previous, and each task in a block can be c
 
 X Reimplement simple_mesh so that we aren't accused of stealing it
 
-* Add vmlib tests and document them
+X Add vmlib tests and document them
 X Reimplement all the camera controls so that we aren't accused of stealing them
 X Add first-person camera controls
 X Add simplfied directional light model
@@ -27,4 +27,3 @@ X Do the animation
 
 
 Without the stretch tasks and assuming full marks for completed tasks, this makes for ~37 marks.
-

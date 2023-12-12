@@ -2,11 +2,13 @@ Task 1.1:
 
 All three members had written their own matrix functions for this task, however Charlie's were used because they do not use for loops to calculate the output, hence they should be slightly faster.
 
+Matthew created the vmlib tests.
+
 Task 1.2
 
 Charlie set up a program that could load the .obj file.
 Charlie set up a perspetive projection for rendering.
-Charlie Set up the simplified directional light model.
+Charlie set up the simplified directional light model.
 Charlie set up the first-person camera controls.
 
 Task 1.3
@@ -28,7 +30,11 @@ Task 1.7
 Charlie implemented the animation
 
 Task 1.8
+Charlie set up the tracking camera controls
+X set up the actual tracking camera mechanics
 
+Task 1.9
+lmao no-one did split-screen
 
 Task 1.10
 
