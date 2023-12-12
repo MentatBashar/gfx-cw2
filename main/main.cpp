@@ -378,7 +378,7 @@ int main() try
 
       state.spaceship_controls.reset = false;
     }
-    GLuint spaceship_vao = create_vao(spaceship_mesh);
+    spaceship_vao = create_vao(spaceship_mesh);
 
     // Update: compute matrices
     Mat44f model2world = make_rotation_y(angle);
@@ -519,7 +519,8 @@ int main() try
     double currentTime = glfwGetTime();
 
     // Print cam position help to place landing pad
-    if (currentTime - state.lastPrintTime >= 1.0) {
+    if (currentTime - state.lastPrintTime >= 1.0)
+    {
         std::printf("Camera Position: X = %.2f, Y = %.2f, Z = %.2f\n",
             state.camera.pos.x, state.camera.pos.y, state.camera.pos.z);
         std::printf("Spaceship Position: X = %.2f, Y = %.2f, Z = %.2f\n",
@@ -591,6 +592,7 @@ namespace
       // Camera controls if camera is active
       if(state->camera.cameraActive && state->camera.mode == 0)
       {
+        // First-person mode
         if( GLFW_KEY_W == aKey )
         {
           if( GLFW_PRESS == aAction )
