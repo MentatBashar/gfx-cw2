@@ -13,15 +13,13 @@ X Load the launchpads and colour them properly
 X Create the custom model of the spaceship
 
 X Do the animation
-* Add the tracking cameras
+X Add the tracking cameras
 
 * Add the simple UI elements
 * Do the measure performance section
 
 [Stretch]
-* Add local light sources
-  X Point Lights
-  * Bind three point lights to spaceship
+X Add local light sources
 * Add particles
 * Add split screen
 

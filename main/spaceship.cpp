@@ -4,9 +4,9 @@
 #include <iostream>
 
 
-MeshData move_spaceship(MeshData spaceship_mesh, float t, Vec3f* pos)
+MeshData move_spaceship(MeshData spaceship_mesh, float t, Vec3f* pos, Vec3f* lightPos)
 {
-  float newX, dy, drZ;
+  float dy, drZ, newX, newY;
 
   // dy increases with a quadratic curve
   dy = std::pow(t, 2) / 16384.f;
@@ -14,18 +14,26 @@ MeshData move_spaceship(MeshData spaceship_mesh, float t, Vec3f* pos)
   // A relatively slow rotation
   drZ = 1.f / 4096.f;
 
-  // Bit of a hack, but because the capsule cones are added last, and the third
-  // last point added to a cone is its top vertex, this should give a pretty
-  // accurate x-position of the spaceship for the tracking cameras(unless of
-  // course its on its side).
-  newX = spaceship_mesh.positions[spaceship_mesh.positions.size()-3].x;
-
   auto newMesh = transformMesh(spaceship_mesh,
                                make_rotation_z(drZ) *
                                make_translation({0.f, dy, 0.f}));
 
+  // Bit of a hack, but because the capsule cones are added last, and the third
+  // last point added to a cone is its top vertex, this should give a pretty
+  // accurate x-position of the spaceship for the tracking cameras(unless of
+  // course its on its side).
+  newX = spaceship_mesh.positions[spaceship_mesh.positions.size()-6].x;
+  newY = spaceship_mesh.positions[spaceship_mesh.positions.size()-6].y;
+
   pos->x = newX;
-  pos->y += dy;
+  pos->y = newY;
+
+  // The 'tip' vertex of the top capsule cone
+  lightPos[0] = spaceship_mesh.positions[spaceship_mesh.positions.size()-3];
+  // The 'tip' vertex of one of the bottom cones on the tanks
+  lightPos[1] = spaceship_mesh.positions[0];
+  // The 'tip' vertex of one of the bottom cones on the tanks
+  lightPos[2] = spaceship_mesh.positions[1536];
 
   return newMesh;
 }
@@ -85,7 +93,7 @@ MeshData make_spaceship()
                                  make_translation({10.f, 0.f, -2.f}));
   
 
-  auto body = make_cube({1.f, .4f, .4f},
+  auto body = make_cube({.4f, .7f, .2f},
                         make_scaling(.5f, 2.25f, .5f) *
                         make_translation({0.f, .75f, 0.f})
                         );
@@ -104,11 +112,11 @@ MeshData make_spaceship()
                                      make_translation({4.f, 0.f, 0.f}));
 
   std::vector<MeshData> meshList = {
-    tank1_body,
     tank1_lower_cone,
+    tank2_lower_cone,
+    tank1_body,
     tank1_upper_cone,
     tank2_body,
-    tank2_lower_cone,
     tank2_upper_cone,
     tank3_body,
     tank3_lower_cone,

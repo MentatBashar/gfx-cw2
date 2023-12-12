@@ -181,7 +181,7 @@ int main() try
   // Global GL state
   OGL_CHECKPOINT_ALWAYS();
 
-  // TODO: global GL setup goes here
+  // Global GL setup goes here
   glEnable(GL_FRAMEBUFFER_SRGB);
   glEnable(GL_CULL_FACE);
   glEnable(GL_DEPTH_TEST);
@@ -298,9 +298,9 @@ int main() try
 
   // Point lights
   Vec3f pointLightPositions[3] = {
-      {1.0f,    2.0f,   3.0f},
-      {20.0f,   2.0f,   20.0f},
-      {50.0f,   2.0f,  -30.0f}
+      {25.0f,   .2f, -6.0f},
+      {25.2f, -.82f, -6.0f},
+      {24.7f, -.72f, -6.0f}
   };
   Vec3f pointLightDiffuseColors[3] = {
       {1.0f,    0.0f,   0.0f},
@@ -317,9 +317,13 @@ int main() try
 
   float spaceship_clock = 0.f;
 
+  std::chrono::high_resolution_clock CPU_timer;
+
   // Main loop
   while( !glfwWindowShouldClose( window ) )
   {
+    auto const frame_start_time = CPU_timer.now();
+
     // Let GLFW process events
     glfwPollEvents();
 
@@ -409,28 +413,51 @@ int main() try
       state.camera.pos.z += cos(yaw) * sin(pitch) * state.camera.speedMul;
     }
 
-    // Arc-ball camera
-    if (state.camera.mode == 1)
-    {
-      state.camera.pos = state.spaceship_controls.pos;
-    }
-
     // Update: move spaceship
     if (state.spaceship_controls.moving == true)
     {
       spaceship_clock += dt;
       spaceship_mesh = move_spaceship(spaceship_mesh,
                                       spaceship_clock,
-                                      &state.spaceship_controls.pos);
+                                      &state.spaceship_controls.pos,
+                                      pointLightPositions);
     }
     if (state.spaceship_controls.reset == true)
     {
       spaceship_clock = 0.f;
       spaceship_mesh = make_spaceship();
+      state.spaceship_controls.pos = {25.f, -0.77f, -6.f};
+      pointLightPositions[0] = {25.0f,   .2f, -6.0f};
+      pointLightPositions[1] = {25.2f, -.82f, -6.0f};
+      pointLightPositions[2] = {24.7f, -.72f, -6.0f};
 
       state.spaceship_controls.reset = false;
     }
-    GLuint spaceship_vao = create_vao(spaceship_mesh);
+    spaceship_vao = create_vao(spaceship_mesh);
+
+    // Fixed-distance camera
+    if (state.camera.mode == 1)
+    {
+      state.camera.pos = state.spaceship_controls.pos;
+
+      state.camera.pos.y += 5.f;
+      state.camera.pos.z -= 10.f;
+    }
+    // Tracking camera
+    else if (state.camera.mode == 2)
+    {
+      // Work out yaw
+      state.camera.yaw = -1.f * atan(
+      (state.camera.pos.x - state.spaceship_controls.pos.x) /
+      (state.camera.pos.z - state.spaceship_controls.pos.z)
+      );
+
+      // Work out pitch
+      state.camera.pitch = atan(
+      (state.camera.pos.y - state.spaceship_controls.pos.y) /
+      (state.camera.pos.z - state.spaceship_controls.pos.z)
+      );
+    }
 
     // Update: compute matrices
     Mat44f model2world = make_rotation_y(angle);
@@ -438,25 +465,10 @@ int main() try
     Mat44f Rx = make_rotation_x(state.camera.pitch);
     Mat44f Ry = make_rotation_y(state.camera.yaw);
 
-    Mat44f T;
-    Mat44f world2camera;
-
-    // Arc-ball camera
-    if (state.camera.mode == 1)
-    {
-      T = make_translation({0.f,
-                            0.f,
-                            -5.f});
-      world2camera = T * Rx * Ry;
-    }
-    // First person camera
-    else
-    {
-      T = make_translation({-state.camera.pos.x,
-                            -state.camera.pos.y,
-                            -state.camera.pos.z});
-      world2camera = Rx * Ry * T;
-    }
+    Mat44f T = make_translation({-state.camera.pos.x,
+                                -state.camera.pos.y,
+                                -state.camera.pos.z});
+    Mat44f world2camera = Rx * Ry * T;
     
 
     Mat44f projection = make_perspective_projection(
@@ -472,7 +484,25 @@ int main() try
     // Draw scene
     OGL_CHECKPOINT_DEBUG();
 
-    //Draw frame
+    unsigned int full_render_time_query_ids[2];
+    glGenQueries(2, full_render_time_query_ids);
+
+    unsigned int terrain_render_time_query_ids[2];
+    glGenQueries(2, terrain_render_time_query_ids);
+
+    unsigned int spaceship_render_time_query_ids[2];
+    glGenQueries(2, spaceship_render_time_query_ids);
+
+    unsigned int landing_pad_render_time_query_ids[2];
+    glGenQueries(2, landing_pad_render_time_query_ids);
+
+    // ------------------------- BEGIN RENDER TIME ---------------------------
+
+    glQueryCounter(full_render_time_query_ids[0], GL_TIMESTAMP);
+
+
+    // ------------------------------- DRAW FRAME ----------------------------
+    
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     glUseProgram(prog.programId());
@@ -512,8 +542,10 @@ int main() try
 
     // ------------------------------- TERRAIN -------------------------------
 
+    glQueryCounter(terrain_render_time_query_ids[0], GL_TIMESTAMP);
+
     // Tell shader that we are using texture
-    glUniform1i(glGetUniformLocation(prog.programId(), "uUseTexture"), GL_FALSE);
+    glUniform1i(glGetUniformLocation(prog.programId(), "uUseTexture"), GL_TRUE);
     // Bind texture to terrain
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, textureObjectId);
@@ -530,13 +562,18 @@ int main() try
     glBindTexture(GL_TEXTURE_2D, 0);
     // We are not using texture from here
     glUniform1i(glGetUniformLocation(prog.programId(), "uUseTexture"), GL_FALSE);
-   
+
+    glQueryCounter(terrain_render_time_query_ids[1], GL_TIMESTAMP);
 
     // ------------------------------- SPACE SHIP -------------------------------
+
+    glQueryCounter(spaceship_render_time_query_ids[0], GL_TIMESTAMP);
 
     glBindVertexArray(spaceship_vao);
     glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
     glDrawArrays(GL_TRIANGLES, 0, spaceshipVertexCount);
+
+    glQueryCounter(spaceship_render_time_query_ids[1], GL_TIMESTAMP);
 
     // ------------------------------- POINT LIGHTS -------------------------------
 
@@ -551,6 +588,8 @@ int main() try
 
     // ------------------------------- LANDING PAD -------------------------------
     
+    glQueryCounter(landing_pad_render_time_query_ids[0], GL_TIMESTAMP);
+
     // Light for landing pad
     // Mat44f landingpadModelMatrix = kIdentity44f;
     //glUniformMatrix4fv(13, 1, GL_TRUE, landingpadModelMatrix.v);
@@ -572,12 +611,62 @@ int main() try
     glBindVertexArray(landingpad_vao);
     glDrawArrays(GL_TRIANGLES, 0, landingpadVertexCount);
 
+    glQueryCounter(landing_pad_render_time_query_ids[1], GL_TIMESTAMP);
 
+    // ------------------------- END RENDER TIME --------------------------
+
+    glQueryCounter(full_render_time_query_ids[1], GL_TIMESTAMP);
+
+    GLuint64 full_render_start_time, full_render_stop_time,
+             terrain_render_start_time, terrain_render_stop_time,
+             spaceship_render_start_time, spaceship_render_stop_time,
+             landing_pad_render_start_time, landing_pad_render_stop_time;
+
+    glGetQueryObjectui64v(full_render_time_query_ids[0],
+                          GL_QUERY_RESULT,
+                          &full_render_start_time);
+    glGetQueryObjectui64v(full_render_time_query_ids[1],
+                          GL_QUERY_RESULT,
+                          &full_render_stop_time);
+
+    glGetQueryObjectui64v(terrain_render_time_query_ids[0],
+                          GL_QUERY_RESULT,
+                          &terrain_render_start_time);
+    glGetQueryObjectui64v(terrain_render_time_query_ids[1],
+                          GL_QUERY_RESULT,
+                          &terrain_render_stop_time);
+
+    glGetQueryObjectui64v(spaceship_render_time_query_ids[0],
+                          GL_QUERY_RESULT,
+                          &spaceship_render_start_time);
+    glGetQueryObjectui64v(spaceship_render_time_query_ids[1],
+                          GL_QUERY_RESULT,
+                          &spaceship_render_stop_time);
+
+    glGetQueryObjectui64v(landing_pad_render_time_query_ids[0],
+                          GL_QUERY_RESULT,
+                          &landing_pad_render_start_time);
+    glGetQueryObjectui64v(landing_pad_render_time_query_ids[1],
+                          GL_QUERY_RESULT,
+                          &landing_pad_render_stop_time);
+
+    std::printf("Terrain render time: %.6f ms\n",
+                (terrain_render_stop_time - terrain_render_start_time) / 1000000.f);
+    std::printf("Spaceship render time: %.6f ms\n",
+                (spaceship_render_stop_time - spaceship_render_start_time) / 1000000.f);
+    std::printf("Landing pad render time: %.6f ms\n",
+                (landing_pad_render_stop_time - landing_pad_render_start_time) / 1000000.f);
+    std::printf("Full render time: %.6f ms\n\n",
+                (full_render_stop_time - full_render_start_time) / 1000000.f);
+
+
+    // ------------------------------- DEBUG PRINTS -------------------------------
 
     double currentTime = glfwGetTime();
 
     // Print cam position help to place landing pad
-    if (currentTime - state.lastPrintTime >= 1.0) {
+    if (currentTime - state.lastPrintTime >= 1.0)
+    {
         std::printf("Camera Position: X = %.2f, Y = %.2f, Z = %.2f\n",
             state.camera.pos.x, state.camera.pos.y, state.camera.pos.z);
         std::printf("Spaceship Position: X = %.2f, Y = %.2f, Z = %.2f\n",
@@ -586,12 +675,15 @@ int main() try
             state.spaceship_controls.pos.z);
         state.lastPrintTime = currentTime;
     }
-    
 
     OGL_CHECKPOINT_DEBUG();
 
     // Display results
     glfwSwapBuffers( window );
+
+    auto const frame_end_time = CPU_timer.now();
+    float CPU_frame_time = std::chrono::duration_cast<Secondsf>(frame_end_time-frame_start_time).count();
+    std::printf("CPU frame render time: %.6f ms\n\n", CPU_frame_time * 1000);
   }
 
   // Cleanup.
@@ -636,6 +728,7 @@ namespace
           glfwSetInputMode( aWindow, GLFW_CURSOR, GLFW_CURSOR_NORMAL );
       }
 
+      // Change camera mode
       if( GLFW_KEY_C == aKey )
       {
         if( GLFW_PRESS == aAction )
@@ -643,12 +736,22 @@ namespace
           state->camera.mode++;
           if (state->camera.mode >= 3)
             state->camera.mode = 0;
+          if (state->camera.mode == 1)
+          {
+            state->camera.yaw = kPi_;
+            state->camera.pitch = 0.464f;
+          }
+          else if (state->camera.mode == 2)
+          {
+            state->camera.pos = {21.04f, 2.75f, 1.44f};
+          }
         }
       }
 
       // Camera controls if camera is active
       if(state->camera.cameraActive && state->camera.mode == 0)
       {
+        // First-person mode
         if( GLFW_KEY_W == aKey )
         {
           if( GLFW_PRESS == aAction )
@@ -705,31 +808,6 @@ namespace
           else if( GLFW_RELEASE == aAction )
             state->camera.speedMul = .2f;
         }
-      }
-
-      // Arc-ball Mode
-      if(state->camera.cameraActive && state->camera.mode == 1)
-      {
-        if( GLFW_KEY_W == aKey )
-        {
-          if( GLFW_PRESS == aAction )
-            state->camera.actionForward = true;
-          else if( GLFW_RELEASE == aAction )
-            state->camera.actionForward = false;
-        }
-        else if( GLFW_KEY_S == aKey )
-        {
-          if( GLFW_PRESS == aAction )
-            state->camera.actionBackward = true;
-          else if( GLFW_RELEASE == aAction )
-            state->camera.actionBackward = false;
-        }
-      }
-
-      // Fixed Mode
-      if(state->camera.mode == 2)
-      {
-        ;
       }
 
       // Check spaceship animation controls
