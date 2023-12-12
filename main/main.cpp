@@ -223,6 +223,59 @@ int main() try
   // Other initialization & loading
   OGL_CHECKPOINT_ALWAYS();
 
+  /*
+  //button VBO and VAO
+  static float const ButtonPos[] = {
+    0.f,  0.8f,
+    -0.7f,  -0.8f,
+    0.7f, -0.8f
+  };
+
+  GLuint buttonPosVBO = 0;
+  glGenBuffers (1, &buttonPosVBO);
+  glBindBuffer( GL_ARRAY_BUFFER, buttonPosVBO);
+  glBufferData (GL_ARRAY_BUFFER, sizeof(ButtonPos), ButtonPos, GL_STATIC_DRAW);
+
+  static float const ButtonCol[] = {
+    1.f, 1.f, 0.f,
+    1.f, 0.f, 1.f,
+    0.f, 1.f, 1.f
+  };
+
+  GLuint buttonColVBO = 0;
+  glGenBuffers (1, &buttonColVBO);
+  glBindBuffer( GL_ARRAY_BUFFER, buttonColVBO);
+  glBufferData (GL_ARRAY_BUFFER, sizeof(ButtonCol), ButtonCol, GL_STATIC_DRAW);
+
+  GLuint vao = 0;
+  glGenVertexArrays( 1, &vao );
+  glBindVertexArray( vao );
+
+  glBindBuffer(GL_ARRAY_BUFFER, buttonPosVBO);
+  glVertexAttribPointer(
+    0,
+    2, GL_FLOAT, GL_FALSE,
+    0,
+    0
+  );
+  glEnableVertexAttribArray(0);
+
+  glBindBuffer(GL_ARRAY_BUFFER, buttonColVBO);
+  glVertexAttribPointer(
+    1,
+    3, GL_FLOAT, GL_FALSE,
+    0,
+    0
+  );
+  glEnableVertexAttribArray(1);
+
+  glBindVertexArray(0);
+  glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+  glDeleteBuffers(1, &buttonPosVBO);
+  glDeleteBuffers(1, &buttonColVBO);
+  */
+
   // Create vertex buffers and VAO
   auto terrain_mesh = load_wavefront_obj(terrainObjPath);
   GLuint terrain_vao = create_vao(terrain_mesh);
@@ -423,6 +476,14 @@ int main() try
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     glUseProgram(prog.programId());
+
+    /*
+    glBindVertexArray(vao);
+    glDrawArrays( GL_TRIANGLES, 0, 3);
+
+    glBindVertexArray(0);
+    glUseProgram(0);
+    */
 
     glUniformMatrix4fv(
         0,
