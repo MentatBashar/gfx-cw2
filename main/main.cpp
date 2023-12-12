@@ -240,6 +240,23 @@ int main() try
   Mat44f landingpadTransform1 = make_translation({ -43.0f, -0.97f, 8.f });
   Mat44f landingpadTransform2 = make_translation({ 25.0f, -0.97f, -6.f });
 
+  // Point lights
+  Vec3f pointLightPositions[3] = {
+      {1.0f,    2.0f,   3.0f},
+      {20.0f,   2.0f,   20.0f},
+      {50.0f,   2.0f,  -30.0f}
+  };
+  Vec3f pointLightDiffuseColors[3] = {
+      {1.0f,    0.0f,   0.0f},
+      {0.0f,    1.0f,   0.0f},
+      {0.0f,    0.0f,   1.0f}
+  };
+  Vec3f pointLightSpecularColors[3] = {
+      {1.0f,    1.0f,   0.0f},
+      {0.0f,    1.0f,   1.0f},
+      {1.0f,    1.0f,   1.0f}
+  };
+
   OGL_CHECKPOINT_ALWAYS();
 
   float spaceship_clock = 0.f;
@@ -398,7 +415,7 @@ int main() try
     // ------------------------------- TERRAIN -------------------------------
 
     // Tell shader that we are using texture
-    glUniform1i(glGetUniformLocation(prog.programId(), "uUseTexture"), GL_TRUE);
+    glUniform1i(glGetUniformLocation(prog.programId(), "uUseTexture"), GL_FALSE);
     // Bind texture to terrain
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, textureObjectId);
@@ -419,35 +436,19 @@ int main() try
 
     // ------------------------------- SPACE SHIP -------------------------------
 
-    // Pass space ship model position to shader
-    
-    // Point lights for point light 1
-    Vec3f pointLightPosition1 = { 1.0f, 2.0f, 3.0f };  
-    Vec3f pointLightDiffuseColor1 = { 0.f, 1.f, 1.0f }; 
-    Vec3f pointLightSpecularColor1 = { 1.0f, 1.0f, 0.f }; 
-    glUniform3fv(9, 1, &pointLightPosition1.x);
-    glUniform3fv(11, 1, &pointLightDiffuseColor1.x);
-    glUniform3fv(12, 1, &pointLightSpecularColor1.x);
-
-    // Point lights for point light 2
-    Vec3f pointLightPosition2 = { 20.0f, 2.0f, 20.0f };  
-    Vec3f pointLightDiffuseColor2 = { 0.f, 1.f, 1.0f }; 
-    Vec3f pointLightSpecularColor2 = { 1.0f, 1.0f, 0.f }; 
-    glUniform3fv(9, 1, &pointLightPosition2.x);
-    glUniform3fv(11, 1, &pointLightDiffuseColor2.x);
-    glUniform3fv(12, 1, &pointLightSpecularColor2.x);
-
-    // Point lights for point light 3
-    Vec3f pointLightPosition3 = {50.0f, 2.0f, -30.0f };  
-    Vec3f pointLightDiffuseColor3 = { 0.f, 1.f, 1.0f }; 
-    Vec3f pointLightSpecularColor3 = { 1.0f, 1.0f, 0.f }; 
-    glUniform3fv(9, 1, &pointLightPosition3.x);
-    glUniform3fv(11, 1, &pointLightDiffuseColor3.x);
-    glUniform3fv(12, 1, &pointLightSpecularColor3.x);
-
     glBindVertexArray(spaceship_vao);
     glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
     glDrawArrays(GL_TRIANGLES, 0, spaceshipVertexCount);
+
+    // ------------------------------- POINT LIGHTS -------------------------------
+
+    for (int i = 0; i < 3; ++i) 
+    {
+        std::string index = std::to_string(i);
+        glUniform3fv(glGetUniformLocation(prog.programId(), ("uPointLightPositions[" + index + "]").c_str()), 1, &pointLightPositions[i].x);
+        glUniform3fv(glGetUniformLocation(prog.programId(), ("uPointLightDiffuse[" + index + "]").c_str()), 1, &pointLightDiffuseColors[i].x);
+        glUniform3fv(glGetUniformLocation(prog.programId(), ("uPointLightSpecular[" + index + "]").c_str()), 1, &pointLightSpecularColors[i].x);
+    }
   
 
     // ------------------------------- LANDING PAD -------------------------------

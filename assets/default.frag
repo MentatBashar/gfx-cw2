@@ -13,16 +13,21 @@ layout(location = 5) uniform bool uUseTexture;          // Use texture or not
 layout(location = 6) uniform vec3 uLightSpecular;       // LightSpecular color for "sun"
 layout(location = 7) uniform float uShininess;          // Shininess
 layout(location = 8) uniform vec3 uCameraPos;           // Camera Position
-layout(location = 9) uniform vec3 uLightPos;            // Position of Point light
-layout(location = 11) uniform vec3 uPointLightDiffuse;  // LightDiffuse color of point light
-layout(location = 12) uniform vec3 uPointLightSpecular; // LightSpecular color of point light
+//layout(location = 9) uniform vec3 uLightPos;            // Position of Point light
+//layout(location = 11) uniform vec3 uPointLightDiffuse;  // LightDiffuse color of point light
+//layout(location = 12) uniform vec3 uPointLightSpecular; // LightSpecular color of point light
+
+// Uniform arrays for point lights
+uniform vec3 uPointLightPositions[3];
+uniform vec3 uPointLightDiffuse[3];
+uniform vec3 uPointLightSpecular[3];
 
 layout(binding = 0) uniform sampler2D uTexture;
 
 void main()
 {
     vec3 normal = normalize(v2fNormal);
-     vec3 viewDir = normalize(uCameraPos - v2fWorldPos);
+    vec3 viewDir = normalize(uCameraPos - v2fWorldPos);
     //vec3 viewDir = normalize(uCameraPos - gl_FragCoord.xyz);
     vec3 baseColor = uUseTexture ? texture(uTexture, v2fTexCoord).rgb : v2fColor;
 
@@ -35,22 +40,27 @@ void main()
     vec3 dirDiffuse = diffDir * uLightDiffuse;
     // vec3 dirSpecular = specDir * uLightSpecular;
 
-    // Handle Directional Point Lights
-    vec3 pointLightDir = normalize(uLightPos - v2fWorldPos);
-    float dist = length(uLightPos - v2fWorldPos);
-    float a = 1.0;  
-    float b = 0.09; 
-    float c = 0.032;
-    float attenuation = 1.0 / (a + b * dist + c * dist * dist);
-    
-    float diffPoint = max(dot(normal, pointLightDir), 0.0);
-    vec3 reflectDirPoint = reflect(-pointLightDir, normal);
-    float specPoint = pow(max(dot(viewDir, reflectDirPoint), 0.0), uShininess);
-    vec3 pointDiffuse = diffPoint * uPointLightDiffuse * attenuation;
-    vec3 pointSpecular = specPoint * uPointLightSpecular * attenuation;
+    // Handle point lights
+    // Init value
+    vec3 pointDiffuse = vec3(0.0);
+    vec3 pointSpecular = vec3(0.0);
+
+    for(int i = 0; i < 3; ++i) 
+    {
+        vec3 pointLightDir = normalize(uPointLightPositions[i] - v2fWorldPos);
+        float diffPoint = max(dot(normal, pointLightDir), 0.0);
+        vec3 reflectDirPoint = reflect(-pointLightDir, normal);
+        float specPoint = pow(max(dot(viewDir, reflectDirPoint), 0.0), uShininess);
+
+        float dist = length(uPointLightPositions[i] - v2fWorldPos);
+        float attenuation = 1.0 / (1.0 + 0.09 * dist + 0.032 * dist * dist);
+
+        pointDiffuse += diffPoint * uPointLightDiffuse[i] * attenuation;
+        pointSpecular += specPoint * uPointLightSpecular[i] * attenuation;
+    }
 
     // Final Color
     vec3 finalDiffuse = dirDiffuse + pointDiffuse;
-    vec3 finalSpecular = /*dirSpecular +*/ pointSpecular;
+    vec3 finalSpecular = pointSpecular;
     oColor = (uSceneAmbient + finalDiffuse + finalSpecular) * baseColor;
 }
