@@ -13,9 +13,6 @@ layout(location = 5) uniform bool uUseTexture;          // Use texture or not
 layout(location = 6) uniform vec3 uLightSpecular;       // LightSpecular color for "sun"
 layout(location = 7) uniform float uShininess;          // Shininess
 layout(location = 8) uniform vec3 uCameraPos;           // Camera Position
-//layout(location = 9) uniform vec3 uLightPos;            // Position of Point light
-//layout(location = 11) uniform vec3 uPointLightDiffuse;  // LightDiffuse color of point light
-//layout(location = 12) uniform vec3 uPointLightSpecular; // LightSpecular color of point light
 
 // Uniform arrays for point lights
 uniform vec3 uPointLightPositions[3];

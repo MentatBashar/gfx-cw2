@@ -181,7 +181,7 @@ int main() try
   // Global GL state
   OGL_CHECKPOINT_ALWAYS();
 
-  // TODO: global GL setup goes here
+  // Global GL setup goes here
   glEnable(GL_FRAMEBUFFER_SRGB);
   glEnable(GL_CULL_FACE);
   glEnable(GL_DEPTH_TEST);
@@ -264,9 +264,13 @@ int main() try
 
   float spaceship_clock = 0.f;
 
+  std::chrono::high_resolution_clock CPU_timer;
+
   // Main loop
   while( !glfwWindowShouldClose( window ) )
   {
+    auto const frame_start_time = CPU_timer.now();
+
     // Let GLFW process events
     glfwPollEvents();
 
@@ -427,7 +431,25 @@ int main() try
     // Draw scene
     OGL_CHECKPOINT_DEBUG();
 
-    //Draw frame
+    unsigned int full_render_time_query_ids[2];
+    glGenQueries(2, full_render_time_query_ids);
+
+    unsigned int terrain_render_time_query_ids[2];
+    glGenQueries(2, terrain_render_time_query_ids);
+
+    unsigned int spaceship_render_time_query_ids[2];
+    glGenQueries(2, spaceship_render_time_query_ids);
+
+    unsigned int landing_pad_render_time_query_ids[2];
+    glGenQueries(2, landing_pad_render_time_query_ids);
+
+    // ------------------------- BEGIN RENDER TIME ---------------------------
+
+    glQueryCounter(full_render_time_query_ids[0], GL_TIMESTAMP);
+
+
+    // ------------------------------- DRAW FRAME ----------------------------
+    
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     glUseProgram(prog.programId());
@@ -459,6 +481,8 @@ int main() try
 
     // ------------------------------- TERRAIN -------------------------------
 
+    glQueryCounter(terrain_render_time_query_ids[0], GL_TIMESTAMP);
+
     // Tell shader that we are using texture
     glUniform1i(glGetUniformLocation(prog.programId(), "uUseTexture"), GL_TRUE);
     // Bind texture to terrain
@@ -477,13 +501,18 @@ int main() try
     glBindTexture(GL_TEXTURE_2D, 0);
     // We are not using texture from here
     glUniform1i(glGetUniformLocation(prog.programId(), "uUseTexture"), GL_FALSE);
-   
+
+    glQueryCounter(terrain_render_time_query_ids[1], GL_TIMESTAMP);
 
     // ------------------------------- SPACE SHIP -------------------------------
+
+    glQueryCounter(spaceship_render_time_query_ids[0], GL_TIMESTAMP);
 
     glBindVertexArray(spaceship_vao);
     glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
     glDrawArrays(GL_TRIANGLES, 0, spaceshipVertexCount);
+
+    glQueryCounter(spaceship_render_time_query_ids[1], GL_TIMESTAMP);
 
     // ------------------------------- POINT LIGHTS -------------------------------
 
@@ -498,6 +527,8 @@ int main() try
 
     // ------------------------------- LANDING PAD -------------------------------
     
+    glQueryCounter(landing_pad_render_time_query_ids[0], GL_TIMESTAMP);
+
     // Light for landing pad
     // Mat44f landingpadModelMatrix = kIdentity44f;
     //glUniformMatrix4fv(13, 1, GL_TRUE, landingpadModelMatrix.v);
@@ -519,6 +550,53 @@ int main() try
     glBindVertexArray(landingpad_vao);
     glDrawArrays(GL_TRIANGLES, 0, landingpadVertexCount);
 
+    glQueryCounter(landing_pad_render_time_query_ids[1], GL_TIMESTAMP);
+
+    // ------------------------- END RENDER TIME --------------------------
+
+    glQueryCounter(full_render_time_query_ids[1], GL_TIMESTAMP);
+
+    GLuint64 full_render_start_time, full_render_stop_time,
+             terrain_render_start_time, terrain_render_stop_time,
+             spaceship_render_start_time, spaceship_render_stop_time,
+             landing_pad_render_start_time, landing_pad_render_stop_time;
+
+    glGetQueryObjectui64v(full_render_time_query_ids[0],
+                          GL_QUERY_RESULT,
+                          &full_render_start_time);
+    glGetQueryObjectui64v(full_render_time_query_ids[1],
+                          GL_QUERY_RESULT,
+                          &full_render_stop_time);
+
+    glGetQueryObjectui64v(terrain_render_time_query_ids[0],
+                          GL_QUERY_RESULT,
+                          &terrain_render_start_time);
+    glGetQueryObjectui64v(terrain_render_time_query_ids[1],
+                          GL_QUERY_RESULT,
+                          &terrain_render_stop_time);
+
+    glGetQueryObjectui64v(spaceship_render_time_query_ids[0],
+                          GL_QUERY_RESULT,
+                          &spaceship_render_start_time);
+    glGetQueryObjectui64v(spaceship_render_time_query_ids[1],
+                          GL_QUERY_RESULT,
+                          &spaceship_render_stop_time);
+
+    glGetQueryObjectui64v(landing_pad_render_time_query_ids[0],
+                          GL_QUERY_RESULT,
+                          &landing_pad_render_start_time);
+    glGetQueryObjectui64v(landing_pad_render_time_query_ids[1],
+                          GL_QUERY_RESULT,
+                          &landing_pad_render_stop_time);
+
+    std::printf("Terrain render time: %.6f ms\n",
+                (terrain_render_stop_time - terrain_render_start_time) / 1000000.f);
+    std::printf("Spaceship render time: %.6f ms\n",
+                (spaceship_render_stop_time - spaceship_render_start_time) / 1000000.f);
+    std::printf("Landing pad render time: %.6f ms\n",
+                (landing_pad_render_stop_time - landing_pad_render_start_time) / 1000000.f);
+    std::printf("Full render time: %.6f ms\n\n",
+                (full_render_stop_time - full_render_start_time) / 1000000.f);
 
 
     // ------------------------------- DEBUG PRINTS -------------------------------
@@ -536,12 +614,15 @@ int main() try
             state.spaceship_controls.pos.z);
         state.lastPrintTime = currentTime;
     }
-    
 
     OGL_CHECKPOINT_DEBUG();
 
     // Display results
     glfwSwapBuffers( window );
+
+    auto const frame_end_time = CPU_timer.now();
+    float CPU_frame_time = std::chrono::duration_cast<Secondsf>(frame_end_time-frame_start_time).count();
+    std::printf("CPU frame render time: %.6f ms\n\n", CPU_frame_time * 1000);
   }
 
   // Cleanup.
