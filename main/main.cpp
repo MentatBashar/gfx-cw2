@@ -356,12 +356,6 @@ int main() try
       state.camera.pos.z += cos(yaw) * sin(pitch) * state.camera.speedMul;
     }
 
-    // Arc-ball camera
-    if (state.camera.mode == 1)
-    {
-      state.camera.pos = state.spaceship_controls.pos;
-    }
-
     // Update: move spaceship
     if (state.spaceship_controls.moving == true)
     {
@@ -380,31 +374,28 @@ int main() try
     }
     spaceship_vao = create_vao(spaceship_mesh);
 
+    // Fixed-distance camera
+    if (state.camera.mode == 1)
+    {
+      state.camera.pos = state.spaceship_controls.pos;
+      state.camera.pos.z -= 10;
+    }
+    // Tracking camera
+    else if (state.camera.mode == 2)
+    {
+      
+    }
+
     // Update: compute matrices
     Mat44f model2world = make_rotation_y(angle);
 
     Mat44f Rx = make_rotation_x(state.camera.pitch);
     Mat44f Ry = make_rotation_y(state.camera.yaw);
 
-    Mat44f T;
-    Mat44f world2camera;
-
-    // Arc-ball camera
-    if (state.camera.mode == 1)
-    {
-      T = make_translation({0.f,
-                            0.f,
-                            -5.f});
-      world2camera = T * Rx * Ry;
-    }
-    // First person camera
-    else
-    {
-      T = make_translation({-state.camera.pos.x,
-                            -state.camera.pos.y,
-                            -state.camera.pos.z});
-      world2camera = Rx * Ry * T;
-    }
+    Mat44f T = make_translation({-state.camera.pos.x,
+                                -state.camera.pos.y,
+                                -state.camera.pos.z});
+    Mat44f world2camera = Rx * Ry * T;
     
 
     Mat44f projection = make_perspective_projection(
@@ -649,31 +640,6 @@ namespace
           else if( GLFW_RELEASE == aAction )
             state->camera.speedMul = .2f;
         }
-      }
-
-      // Arc-ball Mode
-      if(state->camera.cameraActive && state->camera.mode == 1)
-      {
-        if( GLFW_KEY_W == aKey )
-        {
-          if( GLFW_PRESS == aAction )
-            state->camera.actionForward = true;
-          else if( GLFW_RELEASE == aAction )
-            state->camera.actionForward = false;
-        }
-        else if( GLFW_KEY_S == aKey )
-        {
-          if( GLFW_PRESS == aAction )
-            state->camera.actionBackward = true;
-          else if( GLFW_RELEASE == aAction )
-            state->camera.actionBackward = false;
-        }
-      }
-
-      // Fixed Mode
-      if(state->camera.mode == 2)
-      {
-        ;
       }
 
       // Check spaceship animation controls

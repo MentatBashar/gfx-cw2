@@ -6,7 +6,7 @@
 
 MeshData move_spaceship(MeshData spaceship_mesh, float t, Vec3f* pos, Vec3f* lightPos)
 {
-  float newX, dy, drZ;
+  float dy, drZ, newX, newY;
 
   // dy increases with a quadratic curve
   dy = std::pow(t, 2) / 16384.f;
@@ -18,14 +18,16 @@ MeshData move_spaceship(MeshData spaceship_mesh, float t, Vec3f* pos, Vec3f* lig
   // last point added to a cone is its top vertex, this should give a pretty
   // accurate x-position of the spaceship for the tracking cameras(unless of
   // course its on its side).
-  newX = spaceship_mesh.positions[spaceship_mesh.positions.size()-3].x;
 
   auto newMesh = transformMesh(spaceship_mesh,
                                make_rotation_z(drZ) *
                                make_translation({0.f, dy, 0.f}));
 
+  newX = spaceship_mesh.positions[spaceship_mesh.positions.size()-3].x;
+  newY = spaceship_mesh.positions[spaceship_mesh.positions.size()-3].y;
+
   pos->x = newX;
-  pos->y += dy;
+  pos->y = newY;
 
   // The 'tip' vertex of the top capsule cone
   lightPos[0] = spaceship_mesh.positions[spaceship_mesh.positions.size()-3];
