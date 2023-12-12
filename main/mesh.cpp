@@ -96,4 +96,42 @@ GLuint create_vao(MeshData const& aMeshData) {
     return vao;
 }
 
+std::vector<Vec3f> transformPointData (std::vector<Vec3f> pointData, Vec3f newPos){
+  //need to try something
+}
+
+GLuint create_point_vao(std::vector<Vec3f> pointData, Vec3f color) {
+    GLuint positionVBO = 0;
+    GLuint colorVBO = 0;
+    GLuint vao = 0;
+
+    // Create and bind vao
+    glGenVertexArrays(1, &vao);
+    glBindVertexArray(vao);
+
+    // Position VBO
+    glGenBuffers(1, &positionVBO);
+    glBindBuffer(GL_ARRAY_BUFFER, positionVBO);
+    glBufferData(GL_ARRAY_BUFFER, pointData.size() * sizeof(Vec3f), pointData.data(), GL_STATIC_DRAW);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
+    glEnableVertexAttribArray(0);
+
+    // Color VBO
+    glGenBuffers(1, &colorVBO);
+    glBindBuffer(GL_ARRAY_BUFFER, colorVBO);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(color), std::vector<Vec3f>{color}.data(), GL_STATIC_DRAW);
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, 0);
+    glEnableVertexAttribArray(1);
+
+    // Unbind
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    glBindVertexArray(0);
+
+    // Delete
+    glDeleteBuffers(1, &positionVBO);
+    glDeleteBuffers(1, &colorVBO);
+
+    return vao;
+}
+
 

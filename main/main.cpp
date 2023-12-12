@@ -223,58 +223,18 @@ int main() try
   // Other initialization & loading
   OGL_CHECKPOINT_ALWAYS();
 
-  /*
-  //button VBO and VAO
-  static float const ButtonPos[] = {
-    0.f,  0.8f,
-    -0.7f,  -0.8f,
-    0.7f, -0.8f
+  //particles test VBO and VAO
+  std::vector<Vec3f> particles = {
+    {0.f, -10.f, 0.f},
+    {1.f, -10.f, 0.f},
+    {1.f, -9.f, 0.f},
+    {0.f, -9.f, 0.f},
+    {0.f, -10.f, 0.f},
+    {1.f, -9.f, 0.f}
   };
-
-  GLuint buttonPosVBO = 0;
-  glGenBuffers (1, &buttonPosVBO);
-  glBindBuffer( GL_ARRAY_BUFFER, buttonPosVBO);
-  glBufferData (GL_ARRAY_BUFFER, sizeof(ButtonPos), ButtonPos, GL_STATIC_DRAW);
-
-  static float const ButtonCol[] = {
-    1.f, 1.f, 0.f,
-    1.f, 0.f, 1.f,
-    0.f, 1.f, 1.f
-  };
-
-  GLuint buttonColVBO = 0;
-  glGenBuffers (1, &buttonColVBO);
-  glBindBuffer( GL_ARRAY_BUFFER, buttonColVBO);
-  glBufferData (GL_ARRAY_BUFFER, sizeof(ButtonCol), ButtonCol, GL_STATIC_DRAW);
-
-  GLuint vao = 0;
-  glGenVertexArrays( 1, &vao );
-  glBindVertexArray( vao );
-
-  glBindBuffer(GL_ARRAY_BUFFER, buttonPosVBO);
-  glVertexAttribPointer(
-    0,
-    2, GL_FLOAT, GL_FALSE,
-    0,
-    0
-  );
-  glEnableVertexAttribArray(0);
-
-  glBindBuffer(GL_ARRAY_BUFFER, buttonColVBO);
-  glVertexAttribPointer(
-    1,
-    3, GL_FLOAT, GL_FALSE,
-    0,
-    0
-  );
-  glEnableVertexAttribArray(1);
-
-  glBindVertexArray(0);
-  glBindBuffer(GL_ARRAY_BUFFER, 0);
-
-  glDeleteBuffers(1, &buttonPosVBO);
-  glDeleteBuffers(1, &buttonColVBO);
-  */
+  Vec3f color = {1.f, 0.f, 0.f};
+  GLuint particles_vao = create_point_vao(particles, color);
+  std::size_t particles_count = particles.size();
 
   // Create vertex buffers and VAO
   auto terrain_mesh = load_wavefront_obj(terrainObjPath);
@@ -538,7 +498,7 @@ int main() try
   
     // ------------------------------- 2D GUI --------------------------------
 
-    
+  
 
     // ------------------------------- TERRAIN -------------------------------
 
@@ -612,6 +572,11 @@ int main() try
     glDrawArrays(GL_TRIANGLES, 0, landingpadVertexCount);
 
     glQueryCounter(landing_pad_render_time_query_ids[1], GL_TIMESTAMP);
+
+    // ------------------------ Particles ---------------------------------
+
+    glBindVertexArray(particles_vao);
+    glDrawArrays(GL_TRIANGLES, 0, particles_count);    
 
     // ------------------------- END RENDER TIME --------------------------
 
