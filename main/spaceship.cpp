@@ -14,17 +14,16 @@ MeshData move_spaceship(MeshData spaceship_mesh, float t, Vec3f* pos, Vec3f* lig
   // A relatively slow rotation
   drZ = 1.f / 4096.f;
 
-  // Bit of a hack, but because the capsule cones are added last, and the third
-  // last point added to a cone is its top vertex, this should give a pretty
-  // accurate x-position of the spaceship for the tracking cameras(unless of
-  // course its on its side).
-
   auto newMesh = transformMesh(spaceship_mesh,
                                make_rotation_z(drZ) *
                                make_translation({0.f, dy, 0.f}));
 
-  newX = spaceship_mesh.positions[spaceship_mesh.positions.size()-3].x;
-  newY = spaceship_mesh.positions[spaceship_mesh.positions.size()-3].y;
+  // Bit of a hack, but because the capsule cones are added last, and the third
+  // last point added to a cone is its top vertex, this should give a pretty
+  // accurate x-position of the spaceship for the tracking cameras(unless of
+  // course its on its side).
+  newX = spaceship_mesh.positions[spaceship_mesh.positions.size()-6].x;
+  newY = spaceship_mesh.positions[spaceship_mesh.positions.size()-6].y;
 
   pos->x = newX;
   pos->y = newY;

@@ -369,6 +369,10 @@ int main() try
     {
       spaceship_clock = 0.f;
       spaceship_mesh = make_spaceship();
+      state.spaceship_controls.pos = {25.f, -0.77f, -6.f};
+      pointLightPositions[0] = {25.0f,   .2f, -6.0f};
+      pointLightPositions[1] = {25.2f, -.82f, -6.0f};
+      pointLightPositions[2] = {24.7f, -.72f, -6.0f};
 
       state.spaceship_controls.reset = false;
     }
@@ -378,12 +382,24 @@ int main() try
     if (state.camera.mode == 1)
     {
       state.camera.pos = state.spaceship_controls.pos;
-      state.camera.pos.z -= 10;
+
+      state.camera.pos.y += 5.f;
+      state.camera.pos.z -= 10.f;
     }
     // Tracking camera
     else if (state.camera.mode == 2)
     {
-      
+      // Work out yaw
+      state.camera.yaw = -1.f * atan(
+      (state.camera.pos.x - state.spaceship_controls.pos.x) /
+      (state.camera.pos.z - state.spaceship_controls.pos.z)
+      );
+
+      // Work out pitch
+      state.camera.pitch = atan(
+      (state.camera.pos.y - state.spaceship_controls.pos.y) /
+      (state.camera.pos.z - state.spaceship_controls.pos.z)
+      );
     }
 
     // Update: compute matrices
@@ -570,6 +586,7 @@ namespace
           glfwSetInputMode( aWindow, GLFW_CURSOR, GLFW_CURSOR_NORMAL );
       }
 
+      // Change camera mode
       if( GLFW_KEY_C == aKey )
       {
         if( GLFW_PRESS == aAction )
@@ -577,6 +594,15 @@ namespace
           state->camera.mode++;
           if (state->camera.mode >= 3)
             state->camera.mode = 0;
+          if (state->camera.mode == 1)
+          {
+            state->camera.yaw = kPi_;
+            state->camera.pitch = 0.464f;
+          }
+          else if (state->camera.mode == 2)
+          {
+            state->camera.pos = {21.04f, 2.75f, 1.44f};
+          }
         }
       }
 
