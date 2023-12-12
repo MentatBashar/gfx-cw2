@@ -290,8 +290,11 @@ int main() try
       if (yaw > 2.f * kPi_)
         yaw = -2.f * kPi_ + (2.f*kPi_ - yaw);
 
-      state.camera.pos.x -= cos(yaw) * state.camera.speedMul;
-      state.camera.pos.z -= sin(yaw) * state.camera.speedMul;
+      float pitch = state.camera.pitch;
+
+      state.camera.pos.x -= cos(yaw) * cos(pitch) * state.camera.speedMul;
+      state.camera.pos.y -= sin(pitch) * state.camera.speedMul;
+      state.camera.pos.z -= sin(yaw) * cos(pitch) * state.camera.speedMul;
     }
     else if(state.camera.actionBackward)
     {
@@ -300,8 +303,11 @@ int main() try
       if (yaw > 2.f * kPi_)
         yaw = -2.f * kPi_ + (2.f*kPi_ - yaw);
 
-      state.camera.pos.x += cos(yaw) * state.camera.speedMul;
-      state.camera.pos.z += sin(yaw) * state.camera.speedMul;
+      float pitch = state.camera.pitch;
+
+      state.camera.pos.x += cos(yaw) * cos(pitch) * state.camera.speedMul;
+      state.camera.pos.y += sin(pitch) * state.camera.speedMul;
+      state.camera.pos.z += sin(yaw) * cos(pitch) * state.camera.speedMul;
     }
     else if(state.camera.actionLeft)
     {
@@ -317,11 +323,21 @@ int main() try
     }
     else if(state.camera.actionUp)
     {
-      state.camera.pos.y += 0.2f * state.camera.speedMul;
+      float yaw = state.camera.yaw;
+      float pitch = state.camera.pitch;
+
+      state.camera.pos.x += sin(yaw) * sin(pitch) * state.camera.speedMul;
+      state.camera.pos.y += cos(pitch) * state.camera.speedMul;
+      state.camera.pos.z -= cos(yaw) * sin(pitch) * state.camera.speedMul;
     }
     else if(state.camera.actionDown)
     {
-      state.camera.pos.y -= 0.2f * state.camera.speedMul;
+      float yaw = state.camera.yaw;
+      float pitch = state.camera.pitch;
+
+      state.camera.pos.x -= sin(yaw) * sin(pitch) * state.camera.speedMul;
+      state.camera.pos.y -= cos(pitch) * state.camera.speedMul;
+      state.camera.pos.z += cos(yaw) * sin(pitch) * state.camera.speedMul;
     }
 
     // Arc-ball camera
