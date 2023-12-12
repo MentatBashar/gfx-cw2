@@ -245,9 +245,9 @@ int main() try
 
   // Point lights
   Vec3f pointLightPositions[3] = {
-      {1.0f,    2.0f,   3.0f},
-      {20.0f,   2.0f,   20.0f},
-      {50.0f,   2.0f,  -30.0f}
+      {25.0f,   .2f, -6.0f},
+      {25.2f, -.82f, -6.0f},
+      {24.7f, -.72f, -6.0f}
   };
   Vec3f pointLightDiffuseColors[3] = {
       {1.0f,    0.0f,   0.0f},
@@ -368,7 +368,8 @@ int main() try
       spaceship_clock += dt;
       spaceship_mesh = move_spaceship(spaceship_mesh,
                                       spaceship_clock,
-                                      &state.spaceship_controls.pos);
+                                      &state.spaceship_controls.pos,
+                                      pointLightPositions);
     }
     if (state.spaceship_controls.reset == true)
     {
@@ -452,7 +453,7 @@ int main() try
     // ------------------------------- TERRAIN -------------------------------
 
     // Tell shader that we are using texture
-    glUniform1i(glGetUniformLocation(prog.programId(), "uUseTexture"), GL_FALSE);
+    glUniform1i(glGetUniformLocation(prog.programId(), "uUseTexture"), GL_TRUE);
     // Bind texture to terrain
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, textureObjectId);
@@ -512,6 +513,8 @@ int main() try
     glDrawArrays(GL_TRIANGLES, 0, landingpadVertexCount);
 
 
+
+    // ------------------------------- DEBUG PRINTS -------------------------------
 
     double currentTime = glfwGetTime();
 
