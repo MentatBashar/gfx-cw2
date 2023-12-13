@@ -2,6 +2,7 @@
 #define MESH_HPP
 
 #include <glad.h>
+#include <iostream>
 
 #include <vector>
 
@@ -23,5 +24,6 @@ MeshData transformMesh(MeshData mesh, Mat44f aTransform);
 
 GLuint create_vao(MeshData const&);
 GLuint create_point_vao(std::vector<Vec3f> pointData, Vec3f color);
+std::vector<Vec3f> transformPointData (Vec3f newPos);
 
 #endif // MESH_HPP

@@ -96,8 +96,18 @@ GLuint create_vao(MeshData const& aMeshData) {
     return vao;
 }
 
-std::vector<Vec3f> transformPointData (std::vector<Vec3f> pointData, Vec3f newPos){
-  //need to try something
+std::vector<Vec3f> transformPointData (Vec3f newPos){
+  
+  std::vector<Vec3f> returnPointData = {
+    {newPos.x + 0.075f, newPos.y, newPos.z},
+    {newPos.x + 0.225f, newPos.y, newPos.z},
+    {newPos.x + 0.225f, newPos.y - .15f, newPos.z},
+    {newPos.x + 0.075f, newPos.y - .15f, newPos.z},
+    {newPos.x + 0.075f, newPos.y, newPos.z},
+    {newPos.x + 0.225f, newPos.y - .15f, newPos.z}
+  };
+
+  return returnPointData;
 }
 
 GLuint create_point_vao(std::vector<Vec3f> pointData, Vec3f color) {
