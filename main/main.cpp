@@ -207,11 +207,19 @@ int main() try
       } );
 
   state.prog = &prog;
-  state.activeCamera = &state.camera_a;
-  state.activeCamera->mode = 0;
-  state.activeCamera->pos = {25.f, 5.f, -10.f};
-  state.activeCamera->pitch = 0.f;
-  state.activeCamera->yaw   = kPi_ / -2.f;
+
+  state.activeCamera           = &state.camera_b;
+  state.activeCamera->mode     = 0;
+  state.activeCamera->pos      = {25.f, 5.f, -10.f};
+  state.activeCamera->pitch    = 0.f;
+  state.activeCamera->yaw      = kPi_ / -2.f;
+  state.activeCamera->speedMul = 0.2f;
+
+  state.activeCamera           = &state.camera_a;
+  state.activeCamera->mode     = 0;
+  state.activeCamera->pos      = {25.f, 5.f, -10.f};
+  state.activeCamera->pitch    = 0.f;
+  state.activeCamera->yaw      = kPi_ / -2.f;
   state.activeCamera->speedMul = 0.2f;
 
   state.spaceship_controls.moving = false;
@@ -440,8 +448,8 @@ int main() try
       Mat44f Ry = make_rotation_y(state.activeCamera->yaw);
 
       Mat44f T = make_translation({-state.activeCamera->pos.x,
-          -state.activeCamera->pos.y,
-          -state.activeCamera->pos.z});
+                                   -state.activeCamera->pos.y,
+                                   -state.activeCamera->pos.z});
       Mat44f world2activeCamera = Rx * Ry * T;
 
       float aspect_ratio;
@@ -756,65 +764,126 @@ namespace
         }
       }
 
-      // Camera controls if activeCamera is active
-      if(state->activeCamera->cameraActive && state->activeCamera->mode == 0)
+      // Camera controls if camera_a is active
+      if(state->camera_a.cameraActive && state->camera_a.mode == 0)
       {
         // First-person mode
         if( GLFW_KEY_W == aKey )
         {
           if( GLFW_PRESS == aAction )
-            state->activeCamera->actionForward = true;
+            state->camera_a.actionForward = true;
           else if( GLFW_RELEASE == aAction )
-            state->activeCamera->actionForward = false;
+            state->camera_a.actionForward = false;
         }
         else if( GLFW_KEY_S == aKey )
         {
           if( GLFW_PRESS == aAction )
-            state->activeCamera->actionBackward = true;
+            state->camera_a.actionBackward = true;
           else if( GLFW_RELEASE == aAction )
-            state->activeCamera->actionBackward = false;
+            state->camera_a.actionBackward = false;
         }
         else if( GLFW_KEY_A == aKey )
         {
           if( GLFW_PRESS == aAction )
-            state->activeCamera->actionLeft = true;
+            state->camera_a.actionLeft = true;
           else if( GLFW_RELEASE == aAction )
-            state->activeCamera->actionLeft = false;
+            state->camera_a.actionLeft = false;
         }
         else if( GLFW_KEY_D == aKey )
         {
           if( GLFW_PRESS == aAction )
-            state->activeCamera->actionRight = true;
+            state->camera_a.actionRight = true;
           else if( GLFW_RELEASE == aAction )
-            state->activeCamera->actionRight = false;
+            state->camera_a.actionRight = false;
         }
         else if( GLFW_KEY_Q == aKey )
         {
           if( GLFW_PRESS == aAction )
-            state->activeCamera->actionUp = true;
+            state->camera_a.actionUp = true;
           else if( GLFW_RELEASE == aAction )
-            state->activeCamera->actionUp = false;
+            state->camera_a.actionUp = false;
         }
         else if( GLFW_KEY_E == aKey )
         {
           if( GLFW_PRESS == aAction )
-            state->activeCamera->actionDown = true;
+            state->camera_a.actionDown = true;
           else if( GLFW_RELEASE == aAction )
-            state->activeCamera->actionDown = false;
+            state->camera_a.actionDown = false;
         }
         else if( GLFW_KEY_LEFT_SHIFT == aKey )
         {
           if( GLFW_PRESS == aAction )
-            state->activeCamera->speedMul = .4f;
+            state->camera_a.speedMul = .4f;
           else if( GLFW_RELEASE == aAction )
-            state->activeCamera->speedMul = .2f;
+            state->camera_a.speedMul = .2f;
         }
         else if( GLFW_KEY_LEFT_CONTROL == aKey )
         {
           if( GLFW_PRESS == aAction )
-            state->activeCamera->speedMul = .1f;
+            state->camera_a.speedMul = .1f;
           else if( GLFW_RELEASE == aAction )
-            state->activeCamera->speedMul = .2f;
+            state->camera_a.speedMul = .2f;
+        }
+      }
+      // Camera controls if camera_b is active
+      if(state->camera_b.cameraActive && state->camera_b.mode == 0)
+      {
+        // First-person mode
+        if( GLFW_KEY_W == aKey )
+        {
+          if( GLFW_PRESS == aAction )
+            state->camera_b.actionForward = true;
+          else if( GLFW_RELEASE == aAction )
+            state->camera_b.actionForward = false;
+        }
+        else if( GLFW_KEY_S == aKey )
+        {
+          if( GLFW_PRESS == aAction )
+            state->camera_b.actionBackward = true;
+          else if( GLFW_RELEASE == aAction )
+            state->camera_b.actionBackward = false;
+        }
+        else if( GLFW_KEY_A == aKey )
+        {
+          if( GLFW_PRESS == aAction )
+            state->camera_b.actionLeft = true;
+          else if( GLFW_RELEASE == aAction )
+            state->camera_b.actionLeft = false;
+        }
+        else if( GLFW_KEY_D == aKey )
+        {
+          if( GLFW_PRESS == aAction )
+            state->camera_b.actionRight = true;
+          else if( GLFW_RELEASE == aAction )
+            state->camera_b.actionRight = false;
+        }
+        else if( GLFW_KEY_Q == aKey )
+        {
+          if( GLFW_PRESS == aAction )
+            state->camera_b.actionUp = true;
+          else if( GLFW_RELEASE == aAction )
+            state->camera_b.actionUp = false;
+        }
+        else if( GLFW_KEY_E == aKey )
+        {
+          if( GLFW_PRESS == aAction )
+            state->camera_b.actionDown = true;
+          else if( GLFW_RELEASE == aAction )
+            state->camera_b.actionDown = false;
+        }
+        else if( GLFW_KEY_LEFT_SHIFT == aKey )
+        {
+          if( GLFW_PRESS == aAction )
+            state->camera_b.speedMul = .4f;
+          else if( GLFW_RELEASE == aAction )
+            state->camera_b.speedMul = .2f;
+        }
+        else if( GLFW_KEY_LEFT_CONTROL == aKey )
+        {
+          if( GLFW_PRESS == aAction )
+            state->camera_b.speedMul = .1f;
+          else if( GLFW_RELEASE == aAction )
+            state->camera_b.speedMul = .2f;
         }
       }
 
@@ -842,38 +911,70 @@ namespace
   {
     if( auto* state = static_cast<State_*>(glfwGetWindowUserPointer( aWindow )) )
     {
-      if(state->activeCamera->cameraActive && state->activeCamera->mode == 0)
+      if(state->camera_a.cameraActive && state->camera_a.mode == 0)
       {
-        auto const dx = float(aX-state->activeCamera->lastX);
-        auto const dy = float(aY-state->activeCamera->lastY);
+        auto const dx = float(aX-state->camera_a.lastX);
+        auto const dy = float(aY-state->camera_a.lastY);
 
-        state->activeCamera->yaw += dx*kMouseSensitivity_;
+        state->camera_a.yaw += dx*kMouseSensitivity_;
 
         // The most duct-tape solution to clamping the activeCamera yaw between
         // 2*pi and -2*pi you have ever seen. And it works apparently!
-        if (state->activeCamera->yaw > 0)
-          state->activeCamera->yaw = -128.f * kPi_;
+        if (state->camera_a.yaw > 0)
+          state->camera_a.yaw = -128.f * kPi_;
 
         /* No, I don't why this doesn't work.
-           if(state->activeCamera->yaw > 2.f * kPi_)
+           if(state->camera_a.yaw > 2.f * kPi_)
            {
-           state->activeCamera->yaw = (-2.f * kPi_) + (state->activeCamera->yaw - 2.f*kPi_);
+           state->camera_a.yaw = (-2.f * kPi_) + (state->camera_a.yaw - 2.f*kPi_);
            }
-           else if(state->activeCamera->yaw < -2.f * kPi_)
+           else if(state->camera_a.yaw < -2.f * kPi_)
            {
-           state->activeCamera->yaw = (2.f*kPi_) + (state->activeCamera->yaw - 2.f*kPi_);
+           state->camera_a.yaw = (2.f*kPi_) + (state->camera_a.yaw - 2.f*kPi_);
            }
         */
 
-        state->activeCamera->pitch += dy*kMouseSensitivity_;
-        if( state->activeCamera->pitch > kPi_/2.f )
-          state->activeCamera->pitch = kPi_/2.f;
-        else if( state->activeCamera->pitch < -kPi_/2.f )
-          state->activeCamera->pitch = -kPi_/2.f;
-      }
+        state->camera_a.pitch += dy*kMouseSensitivity_;
+        if( state->camera_a.pitch > kPi_/2.f )
+          state->camera_a.pitch = kPi_/2.f;
+        else if( state->camera_a.pitch < -kPi_/2.f )
+          state->camera_a.pitch = -kPi_/2.f;
 
-      state->activeCamera->lastX = float(aX);
-      state->activeCamera->lastY = float(aY);
+      }
+      if(state->camera_b.cameraActive && state->camera_b.mode == 0)
+      {
+        auto const dx = float(aX-state->camera_b.lastX);
+        auto const dy = float(aY-state->camera_b.lastY);
+
+        state->camera_b.yaw += dx*kMouseSensitivity_;
+
+        // The most duct-tape solution to clamping the activeCamera yaw between
+        // 2*pi and -2*pi you have ever seen. And it works apparently!
+        if (state->camera_b.yaw > 0)
+          state->camera_b.yaw = -128.f * kPi_;
+
+        /* No, I don't why this doesn't work.
+           if(state->camera_b.yaw > 2.f * kPi_)
+           {
+           state->camera_b.yaw = (-2.f * kPi_) + (state->camera_b.yaw - 2.f*kPi_);
+           }
+           else if(state->camera_b.yaw < -2.f * kPi_)
+           {
+           state->camera_b.yaw = (2.f*kPi_) + (state->camera_b.yaw - 2.f*kPi_);
+           }
+        */
+
+        state->camera_b.pitch += dy*kMouseSensitivity_;
+        if( state->camera_b.pitch > kPi_/2.f )
+          state->camera_b.pitch = kPi_/2.f;
+        else if( state->camera_b.pitch < -kPi_/2.f )
+          state->camera_b.pitch = -kPi_/2.f;
+
+      }
+        state->camera_a.lastX = float(aX);
+        state->camera_a.lastY = float(aY);
+        state->camera_b.lastX = float(aX);
+        state->camera_b.lastY = float(aY);
     }
   }
 }
