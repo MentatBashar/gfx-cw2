@@ -56,7 +56,7 @@ namespace
       float yaw, pitch;
 
       float lastX, lastY;
-    } camera;
+    } camera_a, camera_b;
 
     struct SpaceshipControls_
     {
@@ -64,6 +64,7 @@ namespace
       Vec3f pos;
     }spaceship_controls;
 
+    Camera_* activeCamera;
     double lastPrintTime = 0.0; // Last print time for cam pos
     uint viewCount = 1;
   };
@@ -206,11 +207,12 @@ int main() try
       } );
 
   state.prog = &prog;
-  state.camera.mode = 0;
-  state.camera.pos = {25.f, 5.f, -10.f};
-  state.camera.pitch = 0.f;
-  state.camera.yaw   = kPi_ / -2.f;
-  state.camera.speedMul = 0.2f;
+  state.activeCamera = &state.camera_a;
+  state.activeCamera->mode = 0;
+  state.activeCamera->pos = {25.f, 5.f, -10.f};
+  state.activeCamera->pitch = 0.f;
+  state.activeCamera->yaw   = kPi_ / -2.f;
+  state.activeCamera->speedMul = 0.2f;
 
   state.spaceship_controls.moving = false;
   state.spaceship_controls.reset = false;
@@ -303,63 +305,6 @@ int main() try
     float dt = std::chrono::duration_cast<Secondsf>(now-last).count();
     last = now;
 
-    // Update camera state
-    if(state.camera.actionForward)
-    { 
-      float yaw = state.camera.yaw;
-      yaw += kPi_ / 2.f;
-      if (yaw > 2.f * kPi_)
-        yaw = -2.f * kPi_ + (2.f*kPi_ - yaw);
-
-      float pitch = state.camera.pitch;
-
-      state.camera.pos.x -= cos(yaw) * cos(pitch) * state.camera.speedMul;
-      state.camera.pos.y -= sin(pitch) * state.camera.speedMul;
-      state.camera.pos.z -= sin(yaw) * cos(pitch) * state.camera.speedMul;
-    }
-    else if(state.camera.actionBackward)
-    {
-      float yaw = state.camera.yaw;
-      yaw += kPi_ / 2.f;
-      if (yaw > 2.f * kPi_)
-        yaw = -2.f * kPi_ + (2.f*kPi_ - yaw);
-
-      float pitch = state.camera.pitch;
-
-      state.camera.pos.x += cos(yaw) * cos(pitch) * state.camera.speedMul;
-      state.camera.pos.y += sin(pitch) * state.camera.speedMul;
-      state.camera.pos.z += sin(yaw) * cos(pitch) * state.camera.speedMul;
-    }
-    else if(state.camera.actionLeft)
-    {
-      float yaw = state.camera.yaw;
-      state.camera.pos.x -= cos(yaw) * state.camera.speedMul;
-      state.camera.pos.z -= sin(yaw) * state.camera.speedMul;
-    }
-    else if(state.camera.actionRight)
-    {
-      float yaw = state.camera.yaw;
-      state.camera.pos.x += cos(yaw) * state.camera.speedMul;
-      state.camera.pos.z += sin(yaw) * state.camera.speedMul;
-    }
-    else if(state.camera.actionUp)
-    {
-      float yaw = state.camera.yaw;
-      float pitch = state.camera.pitch;
-
-      state.camera.pos.x += sin(yaw) * sin(pitch) * state.camera.speedMul;
-      state.camera.pos.y += cos(pitch) * state.camera.speedMul;
-      state.camera.pos.z -= cos(yaw) * sin(pitch) * state.camera.speedMul;
-    }
-    else if(state.camera.actionDown)
-    {
-      float yaw = state.camera.yaw;
-      float pitch = state.camera.pitch;
-
-      state.camera.pos.x -= sin(yaw) * sin(pitch) * state.camera.speedMul;
-      state.camera.pos.y -= cos(pitch) * state.camera.speedMul;
-      state.camera.pos.z += cos(yaw) * sin(pitch) * state.camera.speedMul;
-    }
 
     // Update: move spaceship
     if (state.spaceship_controls.moving == true)
@@ -383,59 +328,121 @@ int main() try
     }
     spaceship_vao = create_vao(spaceship_mesh);
 
-    // Fixed-distance camera
-    if (state.camera.mode == 1)
-    {
-      state.camera.pos = state.spaceship_controls.pos;
-
-      state.camera.pos.y += 5.f;
-      state.camera.pos.z -= 10.f;
-    }
-    // Tracking camera
-    else if (state.camera.mode == 2)
-    {
-      // Work out yaw
-      state.camera.yaw = -1.f * atan(
-          (state.camera.pos.x - state.spaceship_controls.pos.x) /
-          (state.camera.pos.z - state.spaceship_controls.pos.z)
-          );
-
-      // Work out pitch
-      state.camera.pitch = atan(
-          (state.camera.pos.y - state.spaceship_controls.pos.y) /
-          (state.camera.pos.z - state.spaceship_controls.pos.z)
-          );
-    }
 
     for (uint i = 0; i < state.viewCount; ++i)
     {
       if (state.viewCount == 1)
       {
+        state.activeCamera = &state.camera_a;
         glViewport(0, 0, iwidth, iheight);
       }
       else if (state.viewCount == 2)
       {
         if (i == 0)
         {
+          state.activeCamera = &state.camera_a;
           glViewport(0, 0, iwidth/2, iheight);
         }
         else if (i == 1)
         {
+          state.activeCamera = &state.camera_b;
+          state.activeCamera->cameraActive = state.camera_a.cameraActive;
           glViewport(iwidth/2, 0, iwidth/2, iheight);
         }
       }
 
+      // Update activeCamera state
+      if(state.activeCamera->actionForward)
+      { 
+        float yaw = state.activeCamera->yaw;
+        yaw += kPi_ / 2.f;
+        if (yaw > 2.f * kPi_)
+          yaw = -2.f * kPi_ + (2.f*kPi_ - yaw);
+
+        float pitch = state.activeCamera->pitch;
+
+        state.activeCamera->pos.x -= cos(yaw) * cos(pitch) * state.activeCamera->speedMul;
+        state.activeCamera->pos.y -= sin(pitch) * state.activeCamera->speedMul;
+        state.activeCamera->pos.z -= sin(yaw) * cos(pitch) * state.activeCamera->speedMul;
+      }
+      else if(state.activeCamera->actionBackward)
+      {
+        float yaw = state.activeCamera->yaw;
+        yaw += kPi_ / 2.f;
+        if (yaw > 2.f * kPi_)
+          yaw = -2.f * kPi_ + (2.f*kPi_ - yaw);
+
+        float pitch = state.activeCamera->pitch;
+
+        state.activeCamera->pos.x += cos(yaw) * cos(pitch) * state.activeCamera->speedMul;
+        state.activeCamera->pos.y += sin(pitch) * state.activeCamera->speedMul;
+        state.activeCamera->pos.z += sin(yaw) * cos(pitch) * state.activeCamera->speedMul;
+      }
+      else if(state.activeCamera->actionLeft)
+      {
+        float yaw = state.activeCamera->yaw;
+        state.activeCamera->pos.x -= cos(yaw) * state.activeCamera->speedMul;
+        state.activeCamera->pos.z -= sin(yaw) * state.activeCamera->speedMul;
+      }
+      else if(state.activeCamera->actionRight)
+      {
+        float yaw = state.activeCamera->yaw;
+        state.activeCamera->pos.x += cos(yaw) * state.activeCamera->speedMul;
+        state.activeCamera->pos.z += sin(yaw) * state.activeCamera->speedMul;
+      }
+      else if(state.activeCamera->actionUp)
+      {
+        float yaw = state.activeCamera->yaw;
+        float pitch = state.activeCamera->pitch;
+
+        state.activeCamera->pos.x += sin(yaw) * sin(pitch) * state.activeCamera->speedMul;
+        state.activeCamera->pos.y += cos(pitch) * state.activeCamera->speedMul;
+        state.activeCamera->pos.z -= cos(yaw) * sin(pitch) * state.activeCamera->speedMul;
+      }
+      else if(state.activeCamera->actionDown)
+      {
+        float yaw = state.activeCamera->yaw;
+        float pitch = state.activeCamera->pitch;
+
+        state.activeCamera->pos.x -= sin(yaw) * sin(pitch) * state.activeCamera->speedMul;
+        state.activeCamera->pos.y -= cos(pitch) * state.activeCamera->speedMul;
+        state.activeCamera->pos.z += cos(yaw) * sin(pitch) * state.activeCamera->speedMul;
+      }
+
+      // Fixed-distance activeCamera
+      if (state.activeCamera->mode == 1)
+      {
+        state.activeCamera->pos = state.spaceship_controls.pos;
+
+        state.activeCamera->pos.y += 5.f;
+        state.activeCamera->pos.z -= 10.f;
+      }
+      // Tracking activeCamera
+      else if (state.activeCamera->mode == 2)
+      {
+        // Work out yaw
+        state.activeCamera->yaw = -1.f * atan(
+            (state.activeCamera->pos.x - state.spaceship_controls.pos.x) /
+            (state.activeCamera->pos.z - state.spaceship_controls.pos.z)
+            );
+
+        // Work out pitch
+      state.activeCamera->pitch = atan(
+          (state.activeCamera->pos.y - state.spaceship_controls.pos.y) /
+          (state.activeCamera->pos.z - state.spaceship_controls.pos.z)
+          );
+    }
 
       // Update: compute matrices
       Mat44f model2world = make_rotation_y(angle);
 
-      Mat44f Rx = make_rotation_x(state.camera.pitch);
-      Mat44f Ry = make_rotation_y(state.camera.yaw);
+      Mat44f Rx = make_rotation_x(state.activeCamera->pitch);
+      Mat44f Ry = make_rotation_y(state.activeCamera->yaw);
 
-      Mat44f T = make_translation({-state.camera.pos.x,
-          -state.camera.pos.y,
-          -state.camera.pos.z});
-      Mat44f world2camera = Rx * Ry * T;
+      Mat44f T = make_translation({-state.activeCamera->pos.x,
+          -state.activeCamera->pos.y,
+          -state.activeCamera->pos.z});
+      Mat44f world2activeCamera = Rx * Ry * T;
 
       float aspect_ratio;
       if (state.viewCount == 1)
@@ -449,7 +456,7 @@ int main() try
           0.1f, 200.f
           );
 
-      Mat44f projCameraWorld = projection * world2camera * model2world;
+      Mat44f projCameraWorld = projection * world2activeCamera * model2world;
 
       Mat33f normalMatrix = mat44_to_mat33(transpose(invert(model2world)));
 
@@ -567,13 +574,13 @@ int main() try
       glUniform1f(7, landingpadShininess);
 
       Mat44f model1 = landingpadTransform1; 
-      Mat44f projCameraWorld1 = projection * world2camera * model1;
+      Mat44f projCameraWorld1 = projection * world2activeCamera * model1;
       glUniformMatrix4fv(0, 1, GL_TRUE, projCameraWorld1.v);
       glBindVertexArray(landingpad_vao);
       glDrawArrays(GL_TRIANGLES, 0, landingpadVertexCount);
 
       Mat44f model2 = landingpadTransform2;
-      Mat44f projCameraWorld2 = projection * world2camera * model2;
+      Mat44f projCameraWorld2 = projection * world2activeCamera * model2;
       glUniformMatrix4fv(0, 1, GL_TRUE, projCameraWorld2.v);
       glBindVertexArray(landingpad_vao);
       glDrawArrays(GL_TRIANGLES, 0, landingpadVertexCount);
@@ -640,7 +647,7 @@ int main() try
     if (currentTime - state.lastPrintTime >= 1.0)
     {
       std::printf("Camera Position: X = %.2f, Y = %.2f, Z = %.2f\n",
-          state.camera.pos.x, state.camera.pos.y, state.camera.pos.z);
+          state.activeCamera->pos.x, state.activeCamera->pos.y, state.activeCamera->pos.z);
       std::printf("Spaceship Position: X = %.2f, Y = %.2f, Z = %.2f\n",
           state.spaceship_controls.pos.x,
           state.spaceship_controls.pos.y,
@@ -677,7 +684,7 @@ namespace
     std::fprintf( stderr, "GLFW error: %s (%d)\n", aErrDesc, aErrNum );
   }
 
-  void glfw_callback_key_( GLFWwindow* aWindow, int aKey, int, int aAction, int )
+  void glfw_callback_key_( GLFWwindow* aWindow, int aKey, int, int aAction, int aMod)
   {
     if( GLFW_KEY_ESCAPE == aKey && GLFW_PRESS == aAction )
     {
@@ -687,12 +694,13 @@ namespace
 
     if( auto* state = static_cast<State_*>(glfwGetWindowUserPointer( aWindow )) )
     {
-      // Space toggles camera
+      // Space toggles activeCamera
       if( GLFW_KEY_SPACE == aKey && GLFW_PRESS == aAction )
       {
-        state->camera.cameraActive = !state->camera.cameraActive;
+        state->camera_a.cameraActive = !state->camera_a.cameraActive;
+        state->camera_b.cameraActive = !state->camera_b.cameraActive;
 
-        if( state->camera.cameraActive )
+        if( state->activeCamera->cameraActive )
           glfwSetInputMode( aWindow, GLFW_CURSOR, GLFW_CURSOR_HIDDEN );
         else
           glfwSetInputMode( aWindow, GLFW_CURSOR, GLFW_CURSOR_NORMAL );
@@ -710,85 +718,103 @@ namespace
         }
       }
 
-      // Change camera mode
-      if( GLFW_KEY_C == aKey )
+      // Change activeCamera mode
+      if(GLFW_KEY_C == aKey && GLFW_MOD_SHIFT != aMod)
       {
         if( GLFW_PRESS == aAction )
         {
-          state->camera.mode++;
-          if (state->camera.mode >= 3)
-            state->camera.mode = 0;
-          if (state->camera.mode == 1)
+          state->camera_a.mode++;
+          if (state->camera_a.mode >= 3)
+            state->camera_a.mode = 0;
+          if (state->camera_a.mode == 1)
           {
-            state->camera.yaw = kPi_;
-            state->camera.pitch = 0.464f;
+            state->camera_a.yaw = kPi_;
+            state->camera_a.pitch = 0.464f;
           }
-          else if (state->camera.mode == 2)
+          else if (state->camera_a.mode == 2)
           {
-            state->camera.pos = {21.04f, 2.75f, 1.44f};
+            state->camera_a.pos = {21.04f, 2.75f, 1.44f};
+          }
+        }
+      }
+      if(GLFW_KEY_C == aKey && GLFW_MOD_SHIFT == aMod)
+      {
+        if( GLFW_PRESS == aAction )
+        {
+          state->camera_b.mode++;
+          if (state->camera_b.mode >= 3)
+            state->camera_b.mode = 0;
+          if (state->camera_b.mode == 1)
+          {
+            state->camera_b.yaw = kPi_;
+            state->camera_b.pitch = 0.464f;
+          }
+          else if (state->camera_b.mode == 2)
+          {
+            state->camera_b.pos = {21.04f, 2.75f, 1.44f};
           }
         }
       }
 
-      // Camera controls if camera is active
-      if(state->camera.cameraActive && state->camera.mode == 0)
+      // Camera controls if activeCamera is active
+      if(state->activeCamera->cameraActive && state->activeCamera->mode == 0)
       {
         // First-person mode
         if( GLFW_KEY_W == aKey )
         {
           if( GLFW_PRESS == aAction )
-            state->camera.actionForward = true;
+            state->activeCamera->actionForward = true;
           else if( GLFW_RELEASE == aAction )
-            state->camera.actionForward = false;
+            state->activeCamera->actionForward = false;
         }
         else if( GLFW_KEY_S == aKey )
         {
           if( GLFW_PRESS == aAction )
-            state->camera.actionBackward = true;
+            state->activeCamera->actionBackward = true;
           else if( GLFW_RELEASE == aAction )
-            state->camera.actionBackward = false;
+            state->activeCamera->actionBackward = false;
         }
         else if( GLFW_KEY_A == aKey )
         {
           if( GLFW_PRESS == aAction )
-            state->camera.actionLeft = true;
+            state->activeCamera->actionLeft = true;
           else if( GLFW_RELEASE == aAction )
-            state->camera.actionLeft = false;
+            state->activeCamera->actionLeft = false;
         }
         else if( GLFW_KEY_D == aKey )
         {
           if( GLFW_PRESS == aAction )
-            state->camera.actionRight = true;
+            state->activeCamera->actionRight = true;
           else if( GLFW_RELEASE == aAction )
-            state->camera.actionRight = false;
+            state->activeCamera->actionRight = false;
         }
         else if( GLFW_KEY_Q == aKey )
         {
           if( GLFW_PRESS == aAction )
-            state->camera.actionUp = true;
+            state->activeCamera->actionUp = true;
           else if( GLFW_RELEASE == aAction )
-            state->camera.actionUp = false;
+            state->activeCamera->actionUp = false;
         }
         else if( GLFW_KEY_E == aKey )
         {
           if( GLFW_PRESS == aAction )
-            state->camera.actionDown = true;
+            state->activeCamera->actionDown = true;
           else if( GLFW_RELEASE == aAction )
-            state->camera.actionDown = false;
+            state->activeCamera->actionDown = false;
         }
         else if( GLFW_KEY_LEFT_SHIFT == aKey )
         {
           if( GLFW_PRESS == aAction )
-            state->camera.speedMul = .4f;
+            state->activeCamera->speedMul = .4f;
           else if( GLFW_RELEASE == aAction )
-            state->camera.speedMul = .2f;
+            state->activeCamera->speedMul = .2f;
         }
         else if( GLFW_KEY_LEFT_CONTROL == aKey )
         {
           if( GLFW_PRESS == aAction )
-            state->camera.speedMul = .1f;
+            state->activeCamera->speedMul = .1f;
           else if( GLFW_RELEASE == aAction )
-            state->camera.speedMul = .2f;
+            state->activeCamera->speedMul = .2f;
         }
       }
 
@@ -816,38 +842,38 @@ namespace
   {
     if( auto* state = static_cast<State_*>(glfwGetWindowUserPointer( aWindow )) )
     {
-      if(state->camera.cameraActive && state->camera.mode != 2)
+      if(state->activeCamera->cameraActive && state->activeCamera->mode == 0)
       {
-        auto const dx = float(aX-state->camera.lastX);
-        auto const dy = float(aY-state->camera.lastY);
+        auto const dx = float(aX-state->activeCamera->lastX);
+        auto const dy = float(aY-state->activeCamera->lastY);
 
-        state->camera.yaw += dx*kMouseSensitivity_;
+        state->activeCamera->yaw += dx*kMouseSensitivity_;
 
-        // The most duct-tape solution to clamping the camera yaw between
+        // The most duct-tape solution to clamping the activeCamera yaw between
         // 2*pi and -2*pi you have ever seen. And it works apparently!
-        if (state->camera.yaw > 0)
-          state->camera.yaw = -128.f * kPi_;
+        if (state->activeCamera->yaw > 0)
+          state->activeCamera->yaw = -128.f * kPi_;
 
         /* No, I don't why this doesn't work.
-           if(state->camera.yaw > 2.f * kPi_)
+           if(state->activeCamera->yaw > 2.f * kPi_)
            {
-           state->camera.yaw = (-2.f * kPi_) + (state->camera.yaw - 2.f*kPi_);
+           state->activeCamera->yaw = (-2.f * kPi_) + (state->activeCamera->yaw - 2.f*kPi_);
            }
-           else if(state->camera.yaw < -2.f * kPi_)
+           else if(state->activeCamera->yaw < -2.f * kPi_)
            {
-           state->camera.yaw = (2.f*kPi_) + (state->camera.yaw - 2.f*kPi_);
+           state->activeCamera->yaw = (2.f*kPi_) + (state->activeCamera->yaw - 2.f*kPi_);
            }
-           */
+        */
 
-        state->camera.pitch += dy*kMouseSensitivity_;
-        if( state->camera.pitch > kPi_/2.f )
-          state->camera.pitch = kPi_/2.f;
-        else if( state->camera.pitch < -kPi_/2.f )
-          state->camera.pitch = -kPi_/2.f;
+        state->activeCamera->pitch += dy*kMouseSensitivity_;
+        if( state->activeCamera->pitch > kPi_/2.f )
+          state->activeCamera->pitch = kPi_/2.f;
+        else if( state->activeCamera->pitch < -kPi_/2.f )
+          state->activeCamera->pitch = -kPi_/2.f;
       }
 
-      state->camera.lastX = float(aX);
-      state->camera.lastY = float(aY);
+      state->activeCamera->lastX = float(aX);
+      state->activeCamera->lastY = float(aY);
     }
   }
 }
