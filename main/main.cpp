@@ -275,40 +275,16 @@ int main() try
 
   float spaceship_clock = 0.f;
 
-  std::chrono::high_resolution_clock CPU_timer;
-
-  std::printf("Terrain,Spaceship,Landing_Pad,Full_Render,,,");
+  // std::chrono::high_resolution_clock CPU_timer;    // For perf. tests
 
   // Main loop
   while( !glfwWindowShouldClose( window ) )
   {
-    auto const frame_start_time = CPU_timer.now();
+    // auto const frame_start_time = CPU_timer.now();   // For perf. tests
 
     // Let GLFW process events
     glfwPollEvents();
 
-    // Check if window was resized.
-    float fbwidth, fbheight;
-    {
-      int nwidth, nheight;
-      glfwGetFramebufferSize( window, &nwidth, &nheight );
-
-      fbwidth = float(nwidth);
-      fbheight = float(nheight);
-
-      if( 0 == nwidth || 0 == nheight )
-      {
-        // Window minimized? Pause until it is unminimized.
-        // This is a bit of a hack.
-        do
-        {
-          glfwWaitEvents();
-          glfwGetFramebufferSize( window, &nwidth, &nheight );
-        } while( 0 == nwidth || 0 == nheight );
-      }
-
-      glViewport( 0, 0, nwidth, nheight );
-    }
 
     // Update state
     auto const now = Clock::now();
@@ -341,25 +317,48 @@ int main() try
 
     for (uint i = 0; i < state.viewCount; ++i)
     {
-      if (state.viewCount == 1)
+      // Check if window was resized.
+      float fbwidth, fbheight;
       {
-        state.activeCamera = &state.camera_a;
-        glViewport(0, 0, iwidth, iheight);
-      }
-      else if (state.viewCount == 2)
-      {
-        if (i == 0)
+        int nwidth, nheight;
+        glfwGetFramebufferSize( window, &nwidth, &nheight );
+
+        fbwidth = float(nwidth);
+        fbheight = float(nheight);
+
+        if( 0 == nwidth || 0 == nheight )
+        {
+          // Window minimized? Pause until it is unminimized.
+          // This is a bit of a hack.
+          do
+          {
+            glfwWaitEvents();
+            glfwGetFramebufferSize( window, &nwidth, &nheight );
+          } while( 0 == nwidth || 0 == nheight );
+        }
+
+        glViewport( 0, 0, nwidth, nheight );
+        if (state.viewCount == 1)
         {
           state.activeCamera = &state.camera_a;
-          glViewport(0, 0, iwidth/2, iheight);
+          glViewport(0, 0, nwidth, nheight);
         }
-        else if (i == 1)
+        else if (state.viewCount == 2)
         {
-          state.activeCamera = &state.camera_b;
-          state.activeCamera->cameraActive = state.camera_a.cameraActive;
-          glViewport(iwidth/2, 0, iwidth/2, iheight);
+          if (i == 0)
+          {
+            state.activeCamera = &state.camera_a;
+            glViewport(0, 0, nwidth/2, nheight);
+          }
+          else if (i == 1)
+          {
+            state.activeCamera = &state.camera_b;
+            state.activeCamera->cameraActive = state.camera_a.cameraActive;
+            glViewport(nwidth/2, 0, nwidth/2, nheight);
+          }
         }
       }
+
 
       // Update activeCamera state
       if(state.activeCamera->actionForward)
@@ -655,15 +654,17 @@ int main() try
           (landing_pad_render_stop_time - landing_pad_render_start_time) / 1000000.f);
       std::printf("%.6f,,,\n",
           (full_render_stop_time - full_render_start_time) / 1000000.f);
+*/
 
       OGL_CHECKPOINT_DEBUG();
     }
-*/
+
 
     // ------------------------------- DEBUG PRINTS -------------------------------
 
-    double currentTime = glfwGetTime();
 /*
+    double currentTime = glfwGetTime();
+
     // Print cam position help to place landing pad
     if (currentTime - state.lastPrintTime >= 1.0)
     {
