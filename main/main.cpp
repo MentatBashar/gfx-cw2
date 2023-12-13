@@ -277,6 +277,8 @@ int main() try
 
   std::chrono::high_resolution_clock CPU_timer;
 
+  std::printf("Terrain,Spaceship,Landing_Pad,Full_Render,,,");
+
   // Main loop
   while( !glfwWindowShouldClose( window ) )
   {
@@ -632,6 +634,7 @@ int main() try
           GL_QUERY_RESULT,
           &landing_pad_render_stop_time);
 
+/*
       std::printf("Terrain render time: %.6f ms\n",
           (terrain_render_stop_time - terrain_render_start_time) / 1000000.f);
       std::printf("Spaceship render time: %.6f ms\n",
@@ -640,17 +643,27 @@ int main() try
           (landing_pad_render_stop_time - landing_pad_render_start_time) / 1000000.f);
       std::printf("Full render time: %.6f ms\n\n",
           (full_render_stop_time - full_render_start_time) / 1000000.f);
+*/
 
+/*    TO BE REDIRECTED TO FILE OUTPUT
+ 
+      std::printf("%.6f,",
+          (terrain_render_stop_time - terrain_render_start_time) / 1000000.f);
+      std::printf("%.6f,",
+          (spaceship_render_stop_time - spaceship_render_start_time) / 1000000.f);
+      std::printf("%.6f,",
+          (landing_pad_render_stop_time - landing_pad_render_start_time) / 1000000.f);
+      std::printf("%.6f,,,\n",
+          (full_render_stop_time - full_render_start_time) / 1000000.f);
 
       OGL_CHECKPOINT_DEBUG();
-
-
     }
+*/
 
     // ------------------------------- DEBUG PRINTS -------------------------------
 
     double currentTime = glfwGetTime();
-
+/*
     // Print cam position help to place landing pad
     if (currentTime - state.lastPrintTime >= 1.0)
     {
@@ -662,13 +675,14 @@ int main() try
           state.spaceship_controls.pos.z);
       state.lastPrintTime = currentTime;
     }
-
+*/
     // Display results
     glfwSwapBuffers( window );
-
+/*
     auto const frame_end_time = CPU_timer.now();
     float CPU_frame_time = std::chrono::duration_cast<Secondsf>(frame_end_time-frame_start_time).count();
     std::printf("CPU frame render time: %.6f ms\n\n", CPU_frame_time * 1000);
+*/
   }
 
   // Cleanup.
